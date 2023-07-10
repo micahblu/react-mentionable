@@ -67,6 +67,8 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
 				if (highlightEl && (matches.length === 1 && isMatching) || matches.map(m => m.label).includes(nodeText)) {
           utils.insertMention({
             mentionClassname: mentions.find(m => m.trigger === currentTrigger)?.mentionClassname || '',
+            trigger: currentTrigger,
+            value: matches[0].value,
             editorEl: editorRef.current,
             label: matches[0].label, 
             highlightEl: highlightEl as HTMLElement
@@ -114,7 +116,7 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
 
       onChange({
 				text: editorRef.current.innerText,
-        markup: editorRef.current.innerHTML
+        markup: utils.convertToMarkup(editorRef.current.innerHTML)
 			})
     }
     

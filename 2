@@ -179,21 +179,27 @@ export const debounce = (callback: Function, interval: number): Function => {
 }
 
 export const convertToMarkup = (html: string): string => {
-  const regex = /(<[^>]+>)([^<]+)<\/[^>]+>/g
-
-  return html.replace(/&nbsp;/g, ' ').replace(regex, (match, p1, p2) => {
+  const regex = /(<[^>]+>)(.+)<\/[^>]+>/g
+  // __@[Elon Musk](/people-elonmusk)__
+  return html.replace(regex, (match, p1, p2) => {
     const triggerRegex = /trigger="(.)"/
-    const valueRegex = /value="([^"]+)"/
+    const valueRegex = /value="(.)"/
+
     const triggerMatch = p1.match(triggerRegex)
     const valueMatch = p1.match(valueRegex)
 
     if (!triggerMatch || !valueMatch) {
-      return p2 
+      return match
     }
 
     const trigger = triggerMatch[1]
     const value = valueMatch[1]
-
-    return `__${trigger}[${p2}](${value})__ `
+    // console.log('Trigger', p1.match(triggerRegex)[1])
+    // console.log('match', match)
+    // console.log('p1', p1)
+    // console.log('p2', p2)
+    // console.log('markup value:', `__${trigger}[${p2}](${value})__`)
+    return `__${trigger}[${p2}](${value})__`
+    // return match
   })
 } 

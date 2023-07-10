@@ -29,8 +29,12 @@ const Demo = () => {
       ref={editorRef}
       placeHolder='What is on your mind?'
       inputClass='inputClass'
-      onChange={() => {}}
-      onSubmit={() => {}}
+      onChange={({ text, markup }) => {
+        console.log('onChange', markup)
+      }}
+      onSubmit={({ text, markup }) => {
+        console.log('onSubmit', markup)
+      }}
       mentions={[{
         trigger: '@',
         highlightClassName: 'highlight',
