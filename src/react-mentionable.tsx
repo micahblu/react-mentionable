@@ -67,7 +67,7 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
 				if (highlightEl && (matches.length === 1 && isMatching) || matches.map(m => m.label).includes(nodeText)) {
           utils.insertMention({
             mentionClassname: mentions.find(m => m.trigger === currentTrigger)?.mentionClassname || '',
-            trigger: currentTrigger,
+            trigger: currentTrigger || '',
             value: matches[0].value,
             editorEl: editorRef.current,
             label: matches[0].label, 
@@ -85,12 +85,10 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
         isMatching = false
         setShowSuggestions(false)
       }
-      else if (key === 'Backspace') {
-        // if deleting last char, stop matching and hide suggestions
-        if (highlightEl?.innerText.length === 1) {
-          isMatching = false
-          setShowSuggestions(false)
-        }
+      // if deleting last char, stop matching and hide suggestions
+      else if (key === 'Backspace' && highlightEl?.innerText.length === 1) {
+        isMatching = false
+        setShowSuggestions(false)
       }
       else if (isMatching && key !== currentTrigger) {
 				const inputStr = highlightEl?.innerText || ''
