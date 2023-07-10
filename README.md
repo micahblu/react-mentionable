@@ -11,6 +11,24 @@ React Mentionable is an uncontrolled input, so to clear the input from say a sub
 
 ```js
 const fieldRef = useRef()
+const apiCall = debounce((resolve: Function) => {
+    window.setTimeout(() => {
+      resolve([{
+        label: 'Albert Einstein',
+        value: '/people/albert-einstein'
+      }, {
+        label: 'Elon Musk',
+        value: '/people/elon-musk'
+      }]) 
+    }, 200)
+  }, 100)
+
+const fetchSuggestions = async (searchStr: string): Promise<Array<Suggestion>> => {
+  return await new Promise((resolve) => {
+    apiCall(resolve) 
+  })
+}
+
 const mentions = [{
 	trigger: '@',
 	highlightClassName: 'mentionHighlight',
@@ -50,8 +68,9 @@ const mentions = [{
 		fieldRef.current.innerHTML = ''
 	}}
 >
+	Submit
+</button>
 ```
-
 ### Why
 
 I wanted an input field that allows inlining multiple sets of tags triggered by any confiugured trigger character.
