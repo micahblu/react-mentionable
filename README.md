@@ -11,6 +11,22 @@ React Mentionable is an uncontrolled input, so to clear the input from say a sub
 
 ```js
 const fieldRef = useRef()
+const mentions = [{
+	trigger: '@',
+	highlightClassName: 'mentionHighlight',
+	mentionClassName: 'mention',
+	suggestions: [
+		{ label: 'Elon Musk', value: '/elonmusk' },
+		{ label: 'Mike Tyson', value: '/miketyson' },
+		{ label: 'Albert Einstein', value: '/alberteinstein' },
+		{ label: 'Richard Feynman', value: '/rfeynman ' },
+		{ label: 'Nikola Tesla', value: '/nikolatesla' }
+	]}, {
+	trigger: '#',
+	highlightClassName: 'tagHighlight',
+	mentionClassName: 'tag',
+	suggestions: (searchStr) => fetchSuggestions(searchStr)
+}]
 ```
 
 ```js
@@ -24,34 +40,14 @@ const fieldRef = useRef()
 	placeHolder='Write away'
 	onSubmit={({ text, __html, markup }) => {
 		// do something and clear the input
-		fieldRef.current.clear()
+		fieldRef.current.innerHTML = ''
 	}}
-	inputClass='demo-input'
-	tags={[{
-		trigger: '@',
-		highlightClassName: 'mentionHighlight',
-		mentionClassName: 'mention',
-		suggestions: [
-			{ label: 'Elon Musk', value: '/elonmusk' },
-			{ label: 'Mike Tyson', value: '/miketyson' },
-			{ label: 'Albert Einstein', value: '/alberteinstein' },
-			{ label: 'Richard Feynman', value: '/rfeynman ' },
-			{ label: 'Nikola Tesla', value: '/nikolatesla' }
-		]},
-    {
-		trigger: '#',
-		highlightClassName: 'tagHighlight',
-		mentionClassName: 'tag',
-		suggestions: [
-			{ label: 'Entrepreneurs', value: '/tags/entrepreneurs' },
-			{ label: 'GOAT', value: '/tags/goats' },
-			{ label: 'Mad Science', value: '/tags/mad-science' }
-		]}
-	]}
+	inputClass='editor-class'
+	mentions={mentions}
 />
 <button
 	onClick={() => {
-		fieldRef.current.clear()
+		fieldRef.current.innerHTML = ''
 	}}
 >
 ```

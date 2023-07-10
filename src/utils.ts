@@ -165,4 +165,11 @@ export const scrollIntoView = (editorEl: HTMLElement) => {
   }
 }
 
-export default {}
+export const debounce = (callback: Function, interval: number): Function => {
+  let debounceTimeoutId: number
+
+  return function(...args: Array<any>) {
+    clearTimeout(debounceTimeoutId)
+    debounceTimeoutId = window.setTimeout(() => callback.apply(null, args), interval)
+  }
+}
