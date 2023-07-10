@@ -1,0 +1,12 @@
+.inputClass {
+  border: 1px solid #ccc;
+}
+
+.highlight {
+  color: blue;
+  background: yellow;
+}
+
+.mention {
+  color: blue;
+}
