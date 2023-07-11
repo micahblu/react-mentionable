@@ -14,16 +14,17 @@ const fieldRef = useRef()
 const [fieldValue, setFieldValue] = useState('')
 
 const apiCall = debounce((resolve: Function) => {
-    window.setTimeout(() => {
-      resolve([{
-        label: 'Albert Einstein',
-        value: '/people/albert-einstein'
-      }, {
-        label: 'Elon Musk',
-        value: '/people/elon-musk'
-      }]) 
-    }, 200)
-  }, 100)
+  window.setTimeout(() => {
+    resolve([{
+      label: 'Albert Einstein',
+      value: '/people/albert-einstein'
+    }, {
+      label: 'Elon Musk',
+      value: '/people/elon-musk'
+    }]) 
+  }, 200)
+}, 100)
+
 
 const fetchSuggestions = async (searchStr: string): Promise<Array<Suggestion>> => {
   return await new Promise((resolve) => {
@@ -64,7 +65,7 @@ const mentions = [{
 <button
 	onClick={() => {
     // submit fieldValue and clear field
-		fieldRef.current.innerHTML = ''
+    fieldRef.current.innerHTML = ''
 	}}
 >
 	Submit
