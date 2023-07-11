@@ -10,5 +10,6 @@ module.exports = {
   ],
   "framework": {
     name: "@storybook/react-vite"
-  }
+  },
+  staticDirs: ['../public']
 }

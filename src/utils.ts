@@ -20,7 +20,6 @@ export const insertMention = ({
   mentionEl.setAttribute('trigger', trigger)
   mentionEl.setAttribute('value', value)
   mentionEl.contentEditable = 'false'
-  mentionEl.style.marginRight = '5px'
   mentionEl.innerText = label
   
   // insert tag after highlight element
@@ -36,7 +35,7 @@ export const insertMention = ({
   highlightEl.parentNode?.removeChild(highlightEl) 
 
   scrollIntoView(editorEl)
-  autoPositionCaret(anchorTextNode)
+  autoPositionCaret(editorEl)
 }
 export const removeHighlight = (editorEl: HTMLDivElement, highlightEl: HTMLElement) => {
   // Add text node
@@ -45,7 +44,11 @@ export const removeHighlight = (editorEl: HTMLDivElement, highlightEl: HTMLEleme
   // remove highlighted node
   insertAfter(textNode, highlightEl)
 
-  editorEl.removeChild(highlightEl)
+  if (highlightEl.parentNode) {
+    highlightEl.parentNode.removeChild(highlightEl)
+  } else {
+    editorEl.removeChild(highlightEl)
+  }
 }
 
 export const removeBreaks = (el: HTMLElement | null) => {
@@ -54,6 +57,19 @@ export const removeBreaks = (el: HTMLElement | null) => {
 	for (let i = 0; i < nodes.length; i++) {
 		nodes[i].parentNode?.removeChild(nodes[i])
 	}
+}
+
+export const removeFontTags = (el: HTMLElement | null) => {
+  if (!el) return
+	const nodes = el.getElementsByTagName('font')
+  if (!nodes.length) return
+	for (let i = 0; i < nodes.length; i++) {
+    const text = nodes[i].innerText
+    const textNode = document.createTextNode(text)
+    nodes[i].parentNode?.appendChild(textNode)
+		nodes[i].parentNode?.removeChild(nodes[i])
+	}
+  autoPositionCaret(el)
 }
 
 export const getLastElement = (parentEl: HTMLElement, refNode?: HTMLElement): HTMLElement | undefined => {
@@ -99,7 +115,7 @@ export const getCaretPosition = (element:HTMLElement): number => {
 }
 
 
-export const insertAtCaretPos = (parentEl: HTMLElement, insertEl:HTMLElement) => {
+export const insertAtCaretPos = (parentEl: HTMLElement, insertEl: HTMLElement | ChildNode) => {
 	const selection = window.getSelection()
 	const anchorNode = selection?.anchorNode
 
@@ -137,7 +153,7 @@ export const insertAtCaretPos = (parentEl: HTMLElement, insertEl:HTMLElement) =>
 	const afterNode = document.createTextNode(anchorNode.nodeValue?.substring(anchorCaretPos) || '')
 	const nextSibling = anchorNode.nextSibling
 	
-	parentEl.removeChild(anchorNode)
+	anchorNode.parentNode?.removeChild(anchorNode)
 
 	if (nextSibling) {
 		parentEl.insertBefore(afterNode, nextSibling)
@@ -179,9 +195,9 @@ export const debounce = (callback: Function, interval: number): Function => {
 }
 
 export const convertToMarkup = (html: string): string => {
-  const regex = /(<[^>]+>)([^<]+)<\/[^>]+>/g
+  const mentionRegex = /(<[^>]+>)([^<]+)<\/[^>]+>/g
 
-  return html.replace(/&nbsp;/g, ' ').replace(regex, (match, p1, p2) => {
+  const convertedMarkup = html.replace(/&nbsp;/g, ' ').replace(mentionRegex, (match, p1, p2) => {
     const triggerRegex = /trigger="(.)"/
     const valueRegex = /value="([^"]+)"/
     const triggerMatch = p1.match(triggerRegex)
@@ -196,4 +212,7 @@ export const convertToMarkup = (html: string): string => {
 
     return `__${trigger}[${p2}](${value})__ `
   })
+
+  // unsafe strip of html tags
+  return convertedMarkup.replace(/<[^>]+>/g, ' ')
 } 

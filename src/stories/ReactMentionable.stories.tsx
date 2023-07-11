@@ -3,6 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react'
 import ReactMentionable from '../react-mentionable'
 import type { Mention, Suggestion } from '../react-mentionable'
 import { debounce } from '../utils'
+// import TomBrady from './public/images/tom-brady.jpg'
+// import AlbertEinstein from './images/albert-einstein.jpg'
+// import ElonMusk from './images/elon-musk.jpg'
+// import MikeTyson from './images/mike-tyson.jpg'
 import './DemoStyles.css'
 
 const Demo = () => {
@@ -11,10 +15,24 @@ const Demo = () => {
     window.setTimeout(() => {
       resolve([{
         label: 'Albert Einstein',
-        value: '/people/albert-einstein'
+        value: '/people/albert-einstein',
+        handle: '@alberteinstein',
+        avatar: '/images/albert-einstein.jpg'
       }, {
         label: 'Elon Musk',
-        value: '/people/elon-musk'
+        value: '/people/elon-musk',
+        handle: '@elonmusk',
+        avatar: '/images/elon-musk.jpg'
+      }, {
+        label: 'Mike Tyson',
+        value: '/people/mike-tyson',
+        handle: '@miketyson',
+        avatar: '/images/mike-tyson.jpg'
+      }, {
+        label: 'Tom Brady',
+        value: '/people/mike-tyson',
+        handle: '@tombrady',
+        avatar: '/images/tom-brady.jpg'
       }]) 
     }, 200)
   }, 100)
@@ -30,10 +48,7 @@ const Demo = () => {
       placeHolder='What is on your mind?'
       inputClass='inputClass'
       onChange={({ text, markup }) => {
-        console.log('onChange', markup)
-      }}
-      onSubmit={({ text, markup }) => {
-        console.log('onSubmit', markup)
+        // console.log('onChange', markup)
       }}
       mentions={[{
         trigger: '@',
@@ -41,6 +56,16 @@ const Demo = () => {
         mentionClassname: 'mention',
         suggestions: (searchStr: string) => fetchSuggestions(searchStr) 
       }]}
+      renderSuggestion={(suggestion, selectSuggestion) => (
+        <div
+          onClick={() => selectSuggestion(suggestion)}
+          key={suggestion.label}
+          className='react-mentionable-suggestion'
+          style={{ borderBottom: '1px solid #ccc', padding: '1rem', cursor: 'pointer' }}
+        >
+					{ suggestion.label }
+				</div>
+      )}
     />
   )
 }

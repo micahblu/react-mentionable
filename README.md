@@ -1,6 +1,6 @@
 # React Mentions 
 
-React Mentions is a react component that allows for inlining mentions or tag labels in a text input field. It supports multiple tag sets triggered by a configured trigger character. `onChange` will return an object with text, html and markup.
+React Mentions is a react component that allows for inlining mentions or tag labels in a text field. It supports multiple tags triggered by a configured trigger character. `onChange` will return an object with text and markup.
 
 ### Getting started
 ```
@@ -11,6 +11,8 @@ React Mentionable is an uncontrolled input, so to clear the input from say a sub
 
 ```js
 const fieldRef = useRef()
+const [fieldValue, setFieldValue] = useState('')
+
 const apiCall = debounce((resolve: Function) => {
     window.setTimeout(() => {
       resolve([{
@@ -52,19 +54,16 @@ const mentions = [{
 	ref={fieldRef}
 	autoFocus={true}
 	onChange={({ text, __html, markup }) => {
-		// store values on change
+    setFieldValue(markup)
 	}}
 	defaultValue={''}
 	placeHolder='Write away'
-	onSubmit={({ text, __html, markup }) => {
-		// do something and clear the input
-		fieldRef.current.innerHTML = ''
-	}}
 	inputClass='editor-class'
 	mentions={mentions}
 />
 <button
 	onClick={() => {
+    // submit fieldValue and clear field
 		fieldRef.current.innerHTML = ''
 	}}
 >
