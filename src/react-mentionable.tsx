@@ -67,7 +67,7 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
   }, [disabled])
 
   useLayoutEffect(() => {
-    if (!editorRef?.current) return
+    if (!editorRef?.current || typeof document === 'undefined') return
     const keyUpListener = (e: KeyboardEvent) => {
       if (!editorRef.current) return
 
@@ -153,7 +153,7 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
     const keyDownListener = (e: KeyboardEvent) => {
       const key = e.key || utils.getLastKeyStroke(editorRef.current)
 
-      if (!key || !editorRef.current) return
+      if (!key || !editorRef.current || typeof document === 'undefined') return
       if (key === 'Enter') {
         e.preventDefault()
         const br = document.createElement('br')
