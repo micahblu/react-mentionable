@@ -182,26 +182,6 @@ var convertToMarkup = (html) => {
   return convertedMarkup.replace(/<[^>]+>/g, " ");
 };
 
-// src/styles.css
-(function() {
-  if (!document.getElementById("2d76d2ce1c48b868ea7bbaf5c310ae464f67278ef49d495dbb8ac1501a5660bd")) {
-    var e = document.createElement("style");
-    e.id = "2d76d2ce1c48b868ea7bbaf5c310ae464f67278ef49d495dbb8ac1501a5660bd";
-    e.textContent = `.react-mentionable-suggestions {
-  position: relative;
-  padding: 1rem;
-  border: 1px solid #ccc;
-}
-
-.react-mentionable-input {
-  padding: 1rem;
-  border: 1px solid #ccc;
-}
-`;
-    document.head.appendChild(e);
-  }
-})();
-
 // src/react-mentionable.tsx
 var ReactMentionable = forwardRef((props, ref) => {
   const {

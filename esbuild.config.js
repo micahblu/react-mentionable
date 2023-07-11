@@ -1,5 +1,4 @@
 const { build } = require('esbuild')
-const InlineCSSPlugin = require('esbuild-plugin-inline-css')
 const { nodeExternalsPlugin } = require('esbuild-node-externals')
 const { Generator } = require('npm-dts')
 const { dependencies, peerDependencies } = require('./package.json')
@@ -15,7 +14,6 @@ const sharedConfig = {
   minify: false,
   external: Object.keys(dependencies || {}).concat(Object.keys(peerDependencies || {})),
   plugins: [
-		InlineCSSPlugin(),
 		nodeExternalsPlugin()
 	]
 }

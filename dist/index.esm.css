@@ -1,0 +1,10 @@
+/* src/styles.css */
+.react-mentionable-suggestions {
+  position: relative;
+  padding: 1rem;
+  border: 1px solid #ccc;
+}
+.react-mentionable-input {
+  padding: 1rem;
+  border: 1px solid #ccc;
+}
