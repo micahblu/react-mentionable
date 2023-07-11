@@ -63,10 +63,10 @@ const mentions = [{
 	mentions={mentions}
 />
 <button
-	onClick={() => {
+  onClick={() => {
     // submit fieldValue and clear field
     fieldRef.current.innerHTML = ''
-	}}
+  }}
 >
 	Submit
 </button>
