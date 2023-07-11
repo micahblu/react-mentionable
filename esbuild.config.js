@@ -12,7 +12,7 @@ new Generator({
 const sharedConfig = {
   entryPoints: ['src/index.ts'],
   bundle: true,
-  minify: true,
+  minify: false,
   external: Object.keys(dependencies || {}).concat(Object.keys(peerDependencies || {})),
   plugins: [
 		InlineCSSPlugin(),

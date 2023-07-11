@@ -1,4 +1,193 @@
-import S,{useRef as H,useState as U,useEffect as Q,useLayoutEffect as W,forwardRef as X}from"react";var E=e=>{if(!e)return;let t=_(e);return e.innerText.at(t-1)},w=({mentionClassname:e,editorEl:t,highlightEl:n,value:r,label:s,trigger:i})=>{let c=document.createElement("span");c.className=e,c.setAttribute("trigger",i),c.setAttribute("value",r),c.contentEditable="false",c.innerText=s,L(c,n);let p=document.createTextNode("\xA0");L(p,c),t.removeChild(n),n.parentNode?.removeChild(n),R(t),y(t)},K=(e,t)=>{let n=document.createTextNode(t.innerText);L(n,t),t.parentNode?t.parentNode.removeChild(t):e.removeChild(t)},A=e=>{let t=e.childNodes,n=t.length;for(let r=n;r>0;r--){let s=t[r];if(s?.nodeName==="#text")return;s?.nodeName==="BR"&&s.parentNode?.removeChild(s)}},F=e=>{if(!e)return;let t=e.getElementsByTagName("font");if(t.length){for(let n=0;n<t.length;n++){let r=t[n].innerText,s=document.createTextNode(r);t[n].parentNode?.appendChild(s),t[n].parentNode?.removeChild(t[n])}y(e)}},G=(e,t)=>{let n=e.childNodes.length-1,r;for(let s=0;s<=n;s++){let i=e.childNodes[s];if(i.nodeName!=="#text"&&(r=i),i===t)break}return r},O=(e,t)=>{if(!t)return e.childNodes[e.childNodes.length-1];let n=e.childNodes.length-1,r;for(let s=0;s<=n&&(r=e.childNodes[s],r!==t);s++);return r},_=e=>{let t=0;if(window.getSelection){var n=window.getSelection()?.getRangeAt(0);if(!n)return t;var r=n.cloneRange();r.selectNodeContents(e),r.setEnd(n.endContainer,n.endOffset),t=r.toString().length}return t},P=(e,t)=>{let r=window.getSelection()?.anchorNode;if(!r)return;let s=_(e),i=0;for(let T=0;T<e.childNodes.length;T++){let d=e.childNodes[T];if(d===r)break;d.innerText?i+=d.innerText.length:i+=d.nodeValue?.length||0}if(r===e||i===s){s===0&&e.firstChild?e.insertBefore(t,e.firstChild):e.appendChild(t);return}let c;e.firstChild===r?c=s:c=s-i;let p=document.createTextNode(r.nodeValue?.substring(0,c)||""),b=document.createTextNode(r.nodeValue?.substring(c)||""),o=r.nextSibling;r.parentNode?.removeChild(r),o?(e.insertBefore(b,o),e.insertBefore(t,b),e.insertBefore(p,t)):(e.appendChild(p),e.appendChild(t),e.appendChild(b))},L=(e,t)=>{t.parentNode?.insertBefore(e,t.nextSibling)},y=e=>{let t=window.getSelection(),n=e||t?.anchorNode;n&&t?.collapse(n,n.childNodes.length)},R=e=>{let t=G(e);t?.scrollIntoView&&t.scrollIntoView()};var j=e=>{let t=/(<[^>]+>)([^<]+)<\/[^>]+>/g;return e.replace(/&nbsp;/g," ").replace(t,(r,s,i)=>{let c=/trigger="(.)"/,p=/value="([^"]+)"/,b=s.match(c),o=s.match(p);if(!b||!o)return i;let T=b[1],d=o[1];return`__${T}[${i}](${d})__ `}).replace(/<[^>]+>/g," ")};(function(){if(!document.getElementById("2d76d2ce1c48b868ea7bbaf5c310ae464f67278ef49d495dbb8ac1501a5660bd")){var e=document.createElement("style");e.id="2d76d2ce1c48b868ea7bbaf5c310ae464f67278ef49d495dbb8ac1501a5660bd",e.textContent=`.react-mentionable-suggestions {
+// src/react-mentionable.tsx
+import React, { useRef, useState, useEffect, useLayoutEffect, forwardRef } from "react";
+
+// src/utils.ts
+var getLastKeyStroke = (el) => {
+  if (!el)
+    return;
+  const caretPos = getCaretPosition(el);
+  return el.innerText.at(caretPos - 1);
+};
+var insertMention = ({
+  mentionClassname,
+  editorEl,
+  highlightEl,
+  value,
+  label,
+  trigger
+}) => {
+  const mentionEl = document.createElement("span");
+  mentionEl.className = mentionClassname;
+  mentionEl.setAttribute("trigger", trigger);
+  mentionEl.setAttribute("value", value);
+  mentionEl.contentEditable = "false";
+  mentionEl.innerText = label;
+  insertAfter(mentionEl, highlightEl);
+  const anchorTextNode = document.createTextNode("\xA0");
+  insertAfter(anchorTextNode, mentionEl);
+  editorEl.removeChild(highlightEl);
+  highlightEl.parentNode?.removeChild(highlightEl);
+  scrollIntoView(editorEl);
+  autoPositionCaret(editorEl);
+};
+var removeHighlight = (editorEl, highlightEl) => {
+  const textNode = document.createTextNode(highlightEl.innerText);
+  insertAfter(textNode, highlightEl);
+  if (highlightEl.parentNode) {
+    highlightEl.parentNode.removeChild(highlightEl);
+  } else {
+    editorEl.removeChild(highlightEl);
+  }
+};
+var removeTrailingBreaks = (el) => {
+  const nodes = el.childNodes;
+  const len = nodes.length;
+  for (let i = len; i > 0; i--) {
+    const node = nodes[i];
+    if (node?.nodeName === "#text")
+      return;
+    if (node?.nodeName === "BR") {
+      node.parentNode?.removeChild(node);
+    }
+  }
+};
+var removeFontTags = (el) => {
+  if (!el)
+    return;
+  const nodes = el.getElementsByTagName("font");
+  if (!nodes.length)
+    return;
+  for (let i = 0; i < nodes.length; i++) {
+    const text = nodes[i].innerText;
+    const textNode = document.createTextNode(text);
+    nodes[i].parentNode?.appendChild(textNode);
+    nodes[i].parentNode?.removeChild(nodes[i]);
+  }
+  autoPositionCaret(el);
+};
+var getLastElement = (parentEl, refNode) => {
+  const len = parentEl.childNodes.length - 1;
+  let lastElement;
+  for (let i = 0; i <= len; i++) {
+    const currentEl = parentEl.childNodes[i];
+    if (currentEl.nodeName !== "#text") {
+      lastElement = currentEl;
+    }
+    if (currentEl === refNode)
+      break;
+  }
+  return lastElement;
+};
+var getLastNode = (parentNode, refNode) => {
+  if (!refNode) {
+    return parentNode.childNodes[parentNode.childNodes.length - 1];
+  }
+  const len = parentNode.childNodes.length - 1;
+  let lastNode;
+  for (let i = 0; i <= len; i++) {
+    lastNode = parentNode.childNodes[i];
+    if (lastNode === refNode)
+      break;
+  }
+  return lastNode;
+};
+var getCaretPosition = (element) => {
+  let caretOffset = 0;
+  if (window.getSelection) {
+    var range = window.getSelection()?.getRangeAt(0);
+    if (!range)
+      return caretOffset;
+    var preCaretRange = range.cloneRange();
+    preCaretRange.selectNodeContents(element);
+    preCaretRange.setEnd(range.endContainer, range.endOffset);
+    caretOffset = preCaretRange.toString().length;
+  }
+  return caretOffset;
+};
+var insertAtCaretPos = (parentEl, insertEl) => {
+  const selection = window.getSelection();
+  const anchorNode = selection?.anchorNode;
+  if (!anchorNode)
+    return;
+  const caretPos = getCaretPosition(parentEl);
+  let charCount = 0;
+  for (let i = 0; i < parentEl.childNodes.length; i++) {
+    const child = parentEl.childNodes[i];
+    if (child === anchorNode)
+      break;
+    if (child.innerText) {
+      charCount += child.innerText.length;
+    } else {
+      charCount += child.nodeValue?.length || 0;
+    }
+  }
+  if (anchorNode === parentEl || charCount === caretPos) {
+    if (caretPos === 0 && parentEl.firstChild) {
+      parentEl.insertBefore(insertEl, parentEl.firstChild);
+    } else {
+      parentEl.appendChild(insertEl);
+    }
+    return;
+  }
+  let anchorCaretPos;
+  if (parentEl.firstChild === anchorNode) {
+    anchorCaretPos = caretPos;
+  } else {
+    anchorCaretPos = caretPos - charCount;
+  }
+  const beforeNode = document.createTextNode(anchorNode.nodeValue?.substring(0, anchorCaretPos) || "");
+  const afterNode = document.createTextNode(anchorNode.nodeValue?.substring(anchorCaretPos) || "");
+  const nextSibling = anchorNode.nextSibling;
+  anchorNode.parentNode?.removeChild(anchorNode);
+  if (nextSibling) {
+    parentEl.insertBefore(afterNode, nextSibling);
+    parentEl.insertBefore(insertEl, afterNode);
+    parentEl.insertBefore(beforeNode, insertEl);
+  } else {
+    parentEl.appendChild(beforeNode);
+    parentEl.appendChild(insertEl);
+    parentEl.appendChild(afterNode);
+  }
+};
+var insertAfter = (newNode, existingNode) => {
+  existingNode.parentNode?.insertBefore(newNode, existingNode.nextSibling);
+};
+var autoPositionCaret = (anchorNode) => {
+  const selection = window.getSelection();
+  const anchor = anchorNode ? anchorNode : selection?.anchorNode;
+  if (!anchor)
+    return;
+  selection?.collapse(anchor, anchor.childNodes.length);
+};
+var scrollIntoView = (editorEl) => {
+  const lastElement = getLastElement(editorEl);
+  if (lastElement?.scrollIntoView) {
+    lastElement.scrollIntoView();
+  }
+};
+var convertToMarkup = (html) => {
+  const mentionRegex = /(<[^>]+>)([^<]+)<\/[^>]+>/g;
+  const convertedMarkup = html.replace(/&nbsp;/g, " ").replace(mentionRegex, (match, p1, p2) => {
+    const triggerRegex = /trigger="(.)"/;
+    const valueRegex = /value="([^"]+)"/;
+    const triggerMatch = p1.match(triggerRegex);
+    const valueMatch = p1.match(valueRegex);
+    if (!triggerMatch || !valueMatch) {
+      return p2;
+    }
+    const trigger = triggerMatch[1];
+    const value = valueMatch[1];
+    return `__${trigger}[${p2}](${value})__ `;
+  });
+  return convertedMarkup.replace(/<[^>]+>/g, " ");
+};
+
+// src/styles.css
+(function() {
+  if (!document.getElementById("2d76d2ce1c48b868ea7bbaf5c310ae464f67278ef49d495dbb8ac1501a5660bd")) {
+    var e = document.createElement("style");
+    e.id = "2d76d2ce1c48b868ea7bbaf5c310ae464f67278ef49d495dbb8ac1501a5660bd";
+    e.textContent = `.react-mentionable-suggestions {
   position: relative;
   padding: 1rem;
   border: 1px solid #ccc;
@@ -8,4 +197,184 @@ import S,{useRef as H,useState as U,useEffect as Q,useLayoutEffect as W,forwardR
   padding: 1rem;
   border: 1px solid #ccc;
 }
-`,document.head.appendChild(e)}})();var Y=X((e,t)=>{let{placeHolder:n,inputClass:r,suggestionsClass:s,mentions:i,onChange:c,renderSuggestion:p,disabled:b}=e,o=H(),[T,d]=U(!1),[B,D]=U([]),q=i.map(l=>l.trigger),h=H(!1),u=H(),v=H([]),a=H(),V=l=>{!o.current||!a.current||(w({mentionClassname:i.find(k=>k.trigger===u.current)?.mentionClassname||"",trigger:u.current||"",value:l.value,editorEl:o.current,label:l.label,highlightEl:a.current}),d(!1),h.current=!1)};return Q(()=>{b&&o.current&&(o.current.setAttribute("contenteditable","false"),o.current.style.opacity="0.5")},[b]),W(()=>{if(!o?.current||typeof document>"u")return;let l=x=>{if(!o.current)return;F(o.current);let m=x.key||E(o.current);if(h.current&&m==="Tab"||m===" "){let g=O(o.current);if(!g)return;let f=g?.nodeValue?.replace(u.current||"","").toLowerCase()||"";a.current&&v.current.length===1&&h.current||v.current.map(N=>N.label).includes(f)?w({mentionClassname:i.find(N=>N.trigger===u.current)?.mentionClassname||"",trigger:u.current||"",value:v.current[0].value,editorEl:o.current,label:v.current[0].label,highlightEl:a.current}):h.current&&v.current.length!==1&&(K(o.current,a.current),y(o.current)),h.current=!1,d(!1)}else if(m==="Backspace"){x.preventDefault();let f=window.getSelection()?.anchorNode;if(!f)return;let N=f.childNodes.length||0,M=f.childNodes[N-1];M?.nodeValue===""&&M?.parentNode?.removeChild(M),A(f),A(o.current),a.current?.innerText.length===1&&(x.preventDefault(),d(!1),h.current=!1)}else if(h.current&&m!==u.current){let g=a.current?.innerText||"",f=g.lastIndexOf(u.current||""),N=g.substr(f+1).replace(/[^\w]/,""),M=new RegExp(N,"i"),I=i.find(C=>C.trigger===u.current),$=i.find(C=>C.trigger===u.current)?.suggestions;Array.isArray(I?.suggestions)?$&&(v.current=$.filter(C=>M.test(C.label)),D(v.current)):I?.suggestions(N).then(C=>{v.current=C.filter(z=>M.test(z.label)),D(v.current)})}c({text:o.current.innerText,markup:j(o.current.innerHTML)})},k=x=>{let m=x.key||E(o.current);if(!(!m||!o.current||typeof document>"u")){if(m==="Enter"){x.preventDefault();let g=document.createElement("br"),f=document.createTextNode("\u200B");P(o.current,g),L(f,g),y(o.current)}else if(m==="Tab")x.preventDefault();else if(q.includes(m)){if(h.current){x.preventDefault();return}u.current=m,h.current=!0,a.current=document.createElement("span"),a.current.className=`${i.find(g=>g.trigger===u.current)?.highlightClassName}`,a.current.innerText=u.current,a.current.setAttribute("contentEditable","true"),P(o.current,a.current),d(!0),y(a.current),R(o.current),x.preventDefault()}}};o.current.addEventListener("keydown",k),o.current.addEventListener("keyup",l)},[]),S.createElement("div",{className:"react-mentionable"},S.createElement("div",{className:"react-mentionable-editor-container"},S.createElement("div",{placeholder:n,className:`react-mentionable-input ${r}`,ref:l=>{o.current=l,typeof t=="function"?t(l):t&&t.current},contentEditable:!0})),T&&S.createElement("div",{className:`react-mentionable-suggestions ${s}`},B&&B.map(l=>p?p(l,V):S.createElement("div",{onClick:()=>V(l),key:l.label,className:"react-mentionable-suggestion"},l.label))))}),Z=Y;export{Z as default};
+`;
+    document.head.appendChild(e);
+  }
+})();
+
+// src/react-mentionable.tsx
+var ReactMentionable = forwardRef((props, ref) => {
+  const {
+    placeHolder,
+    inputClass,
+    suggestionsClass,
+    mentions,
+    onChange,
+    renderSuggestion,
+    disabled
+  } = props;
+  const editorRef = useRef();
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const triggers = mentions.map((mention) => mention.trigger);
+  let isMatching = useRef(false);
+  let currentTrigger = useRef();
+  let matches = useRef([]);
+  let highlightEl = useRef();
+  const selectSuggestion = (suggestion) => {
+    if (!editorRef.current || !highlightEl.current)
+      return;
+    insertMention({
+      mentionClassname: mentions.find((m) => m.trigger === currentTrigger.current)?.mentionClassname || "",
+      trigger: currentTrigger.current || "",
+      value: suggestion.value,
+      editorEl: editorRef.current,
+      label: suggestion.label,
+      highlightEl: highlightEl.current
+    });
+    setShowSuggestions(false);
+    isMatching.current = false;
+  };
+  useEffect(() => {
+    if (disabled && editorRef.current) {
+      editorRef.current.setAttribute("contenteditable", "false");
+      editorRef.current.style.opacity = "0.5";
+    }
+  }, [disabled]);
+  useLayoutEffect(() => {
+    if (!editorRef?.current || typeof document === "undefined")
+      return;
+    const keyUpListener = (e) => {
+      if (!editorRef.current)
+        return;
+      removeFontTags(editorRef.current);
+      const key = e.key || getLastKeyStroke(editorRef.current);
+      if (isMatching.current && key === "Tab" || key === " ") {
+        const lastNode = getLastNode(editorRef.current);
+        if (!lastNode)
+          return;
+        const nodeText = lastNode?.nodeValue?.replace(currentTrigger.current || "", "").toLowerCase() || "";
+        if (highlightEl.current && (matches.current.length === 1 && isMatching.current) || matches.current.map((m) => m.label).includes(nodeText)) {
+          insertMention({
+            mentionClassname: mentions.find((m) => m.trigger === currentTrigger.current)?.mentionClassname || "",
+            trigger: currentTrigger.current || "",
+            value: matches.current[0].value,
+            editorEl: editorRef.current,
+            label: matches.current[0].label,
+            highlightEl: highlightEl.current
+          });
+        } else if (isMatching.current && matches.current.length !== 1) {
+          removeHighlight(editorRef.current, highlightEl.current);
+          autoPositionCaret(editorRef.current);
+        }
+        isMatching.current = false;
+        setShowSuggestions(false);
+      } else if (key === "Backspace") {
+        e.preventDefault();
+        const selection = window.getSelection();
+        const anchorNode = selection?.anchorNode;
+        if (!anchorNode)
+          return;
+        const last = anchorNode.childNodes.length || 0;
+        const lastAnchorChild = anchorNode.childNodes[last - 1];
+        if (lastAnchorChild?.nodeValue === "") {
+          lastAnchorChild?.parentNode?.removeChild(lastAnchorChild);
+        }
+        removeTrailingBreaks(anchorNode);
+        removeTrailingBreaks(editorRef.current);
+        if (highlightEl.current?.innerText.length === 1) {
+          e.preventDefault();
+          setShowSuggestions(false);
+          isMatching.current = false;
+        }
+      } else if (isMatching.current && key !== currentTrigger.current) {
+        const inputStr = highlightEl.current?.innerText || "";
+        const symbolIndex = inputStr.lastIndexOf(currentTrigger.current || "");
+        const searchStr = inputStr.substr(symbolIndex + 1).replace(/[^\w]/, "");
+        const regex = new RegExp(searchStr, "i");
+        const mention = mentions.find((m) => m.trigger === currentTrigger.current);
+        const suggestions2 = mentions.find((m) => m.trigger === currentTrigger.current)?.suggestions;
+        if (Array.isArray(mention?.suggestions)) {
+          if (suggestions2) {
+            matches.current = suggestions2.filter((suggestion) => regex.test(suggestion.label));
+            setSuggestions(matches.current);
+          }
+        } else {
+          mention?.suggestions(searchStr).then((suggested) => {
+            matches.current = suggested.filter((suggestion) => regex.test(suggestion.label));
+            setSuggestions(matches.current);
+          });
+        }
+      }
+      onChange({
+        text: editorRef.current.innerText,
+        markup: convertToMarkup(editorRef.current.innerHTML)
+      });
+    };
+    const keyDownListener = (e) => {
+      const key = e.key || getLastKeyStroke(editorRef.current);
+      if (!key || !editorRef.current || typeof document === "undefined")
+        return;
+      if (key === "Enter") {
+        e.preventDefault();
+        const br = document.createElement("br");
+        const textNode = document.createTextNode("\u200B");
+        insertAtCaretPos(editorRef.current, br);
+        insertAfter(textNode, br);
+        autoPositionCaret(editorRef.current);
+      } else if (key === "Tab")
+        e.preventDefault();
+      else if (triggers.includes(key)) {
+        if (isMatching.current) {
+          e.preventDefault();
+          return;
+        }
+        currentTrigger.current = key;
+        isMatching.current = true;
+        highlightEl.current = document.createElement("span");
+        highlightEl.current.className = `${mentions.find((m) => m.trigger === currentTrigger.current)?.highlightClassName}`;
+        highlightEl.current.innerText = currentTrigger.current;
+        highlightEl.current.setAttribute("contentEditable", "true");
+        insertAtCaretPos(editorRef.current, highlightEl.current);
+        setShowSuggestions(true);
+        autoPositionCaret(highlightEl.current);
+        scrollIntoView(editorRef.current);
+        e.preventDefault();
+      }
+    };
+    editorRef.current.addEventListener("keydown", keyDownListener);
+    editorRef.current.addEventListener("keyup", keyUpListener);
+  }, []);
+  return /* @__PURE__ */ React.createElement("div", { className: "react-mentionable" }, /* @__PURE__ */ React.createElement("div", { className: "react-mentionable-editor-container" }, /* @__PURE__ */ React.createElement(
+    "div",
+    {
+      placeholder: placeHolder,
+      className: `react-mentionable-input ${inputClass}`,
+      ref: (node) => {
+        editorRef.current = node;
+        if (typeof ref === "function") {
+          ref(node);
+        } else if (ref) {
+          ref.current;
+        }
+      },
+      contentEditable: true
+    }
+  )), showSuggestions && /* @__PURE__ */ React.createElement("div", { className: `react-mentionable-suggestions ${suggestionsClass}` }, suggestions && suggestions.map((suggestion) => {
+    if (renderSuggestion)
+      return renderSuggestion(suggestion, selectSuggestion);
+    return /* @__PURE__ */ React.createElement(
+      "div",
+      {
+        onClick: () => selectSuggestion(suggestion),
+        key: suggestion.label,
+        className: "react-mentionable-suggestion"
+      },
+      suggestion.label
+    );
+  })));
+});
+var react_mentionable_default = ReactMentionable;
+export {
+  react_mentionable_default as default
+};
