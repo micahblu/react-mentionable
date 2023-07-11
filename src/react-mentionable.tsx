@@ -100,10 +100,27 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
         setShowSuggestions(false)
       }
       // if deleting last char, stop matching and hide suggestions
-      else if (key === 'Backspace' && highlightEl.current?.innerText.length === 1) {
+      else if (key === 'Backspace') {
         e.preventDefault()
-        isMatching.current = false
-        setShowSuggestions(false)
+        const selection = window.getSelection()
+        const anchorNode = selection?.anchorNode
+        if (!anchorNode) return
+        const last = anchorNode.childNodes.length || 0
+        const lastAnchorChild = anchorNode.childNodes[last - 1]
+        if (lastAnchorChild?.nodeValue === '') {
+          lastAnchorChild?.parentNode?.removeChild(lastAnchorChild)
+        }
+        // remove trailing breaks, relative to the anchorNode
+        utils.removeTrailingBreaks(anchorNode)
+        
+        // remove trailing breaks that may sneak in, from the end of the editor
+        utils.removeTrailingBreaks(editorRef.current)
+
+        if (highlightEl.current?.innerText.length === 1) {
+          e.preventDefault()
+          setShowSuggestions(false)
+          isMatching.current = false
+        }
       }
       else if (isMatching.current && key !== currentTrigger.current) {
 				const inputStr = highlightEl.current?.innerText || ''

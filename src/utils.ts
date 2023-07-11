@@ -51,11 +51,15 @@ export const removeHighlight = (editorEl: HTMLDivElement, highlightEl: HTMLEleme
   }
 }
 
-export const removeBreaks = (el: HTMLElement | null) => {
-  if (!el) return
-	const nodes = el.getElementsByTagName('br')
-	for (let i = 0; i < nodes.length; i++) {
-		nodes[i].parentNode?.removeChild(nodes[i])
+export const removeTrailingBreaks = (el: HTMLElement | Node) => {
+  const nodes = el.childNodes
+  const len = nodes.length
+	for (let i = len; i > 0; i--) {
+    const node = nodes[i]
+    if (node?.nodeName === '#text') return // stop once we reach text
+    if (node?.nodeName === 'BR') {
+      node.parentNode?.removeChild(node)
+    }
 	}
 }
 
