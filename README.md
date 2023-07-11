@@ -78,4 +78,5 @@ const mentions = [{
 </button>
 ```
 ### Why
-I really appreciate the work done by react-mentions, however I found their solution didn't work for my use cases. Primarily the inability to color the mention text. In react-mentions you have a textarea field layered atop a div that adds markup for the mention, so while you can add a background or border you can't color the font as the textarea font overlaps it. React mentionable uses a contenteditable div whereas you can style the mentions however you'd like. It also doesn't have the same issues with syncing the textarea overlay that react-mentions does. 
+I really appreciate the work done by react-mentions, however I found their solution didn't work for my use cases. Primarily the inability to color the mention text. In react-mentions you have a textarea field layered atop a div that adds markup for the mention, so while you can add a background or border you can't color the actual text as the textarea text overlaps it. React mentionable uses a contenteditable div whereas you can style the mentions however you'd like. It also doesn't have the same issues with syncing the textarea overlay that react-mentions does. 
+
