@@ -199,7 +199,7 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
   useEffect(() => {
     if (defaultValue && editorRef.current) {
       // editorRef.current 
-      editorRef.current.innerHTML = utils.convertMentions(defaultValue, mentions)
+      editorRef.current.innerHTML = utils.convertToMentions(defaultValue, mentions)
     }
   }, [defaultValue])
 

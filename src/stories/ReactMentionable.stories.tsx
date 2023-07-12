@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import ReactMentionable from '../react-mentionable'
 import type { Mention, Suggestion } from '../react-mentionable'
-import { debounce } from '../utils'
+import { debounce, convertFormattedMentions } from '../'
 // import TomBrady from './public/images/tom-brady.jpg'
 // import AlbertEinstein from './images/albert-einstein.jpg'
 // import ElonMusk from './images/elon-musk.jpg'
@@ -10,6 +10,12 @@ import { debounce } from '../utils'
 import './DemoStyles.css'
 
 const Demo = () => {
+  const markup = 'The two GOATS of all time have to be __@[Mike Tyson](/people/mike-tyson)__  and __@[Tom Brady](/people/mike-tyson)__!'
+  const toLinks = convertFormattedMentions(markup, (trigger: string, label: string, value: string) => {
+    console.log('trigger, label, value', trigger, label, value)
+    return `<a href="${value}">${label}</a>`
+  })
+  console.log('toLinks', toLinks)
   const editorRef = useRef<HTMLDivElement | null>(null)
   const apiCall = debounce((resolve: Function) => {
     window.setTimeout(() => {
@@ -48,7 +54,7 @@ const Demo = () => {
         ref={editorRef}
         placeHolder='What is on your mind?'
         inputClass='inputClass'
-        defaultValue={'Hey __@[Elon Musk](/people/elon-musk)__   wanna buy Equria? or __@[Tom Brady](/people/mike-tyson)__  maybe?'}
+        defaultValue={markup}
         suggestionsClass='suggestions'
         onChange={({ text, markup }) => {
           console.log('onChange', markup)

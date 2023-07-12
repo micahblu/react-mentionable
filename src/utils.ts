@@ -188,7 +188,7 @@ export const autoPositionCaret = (anchorNode: Node) => {
 //   }
 // }
 
-export const convertMentions = (str: string, mentions: Array<Mention>) => {
+export const convertToMentions = (str: string, mentions: Array<Mention>) => {
   const mentionMarkupRegex = /__(.)\[([^\]]+)\]\(([^\)]+)\)__/g
 
   return str.replace(mentionMarkupRegex, (match, p1, p2, p3) => {
@@ -199,7 +199,17 @@ export const convertMentions = (str: string, mentions: Array<Mention>) => {
     const classname = mentions.find(m => m.trigger === trigger)?.mentionClassname
     return `<span class="${classname}" trigger="${trigger}" value="${value}" contenteditable="false">${label}</span>`
   })
+}
 
+export const convertFormattedMentions = (str: string, cb: (trigger: string, label: string, value: string) => string) => {
+  const mentionMarkupRegex = /__(.)\[([^\]]+)\]\(([^\)]+)\)__/g
+
+  return str.replace(mentionMarkupRegex, (match, p1, p2, p3) => {
+    const trigger = p1
+    const label = p2
+    const value = p3
+    return cb(trigger, label, value)
+  })
 }
 
 export const debounce = (callback: Function, interval: number): Function => {
