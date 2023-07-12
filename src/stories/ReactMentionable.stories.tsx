@@ -48,9 +48,10 @@ const Demo = () => {
         ref={editorRef}
         placeHolder='What is on your mind?'
         inputClass='inputClass'
+        defaultValue={'Hey __@[Elon Musk](/people/elon-musk)__   wanna buy Equria? or __@[Tom Brady](/people/mike-tyson)__  maybe?'}
         suggestionsClass='suggestions'
         onChange={({ text, markup }) => {
-          // console.log('onChange', markup)
+          console.log('onChange', markup)
         }}
         mentions={[{
           trigger: '@',

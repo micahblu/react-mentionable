@@ -28,6 +28,7 @@ type ReactMenttionableProps = {
 const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((props: ReactMenttionableProps, ref: React.Ref<HTMLDivElement | null>) => {
   const {
     placeHolder,
+    defaultValue,
     inputClass,
     suggestionsClass,
     mentions,
@@ -69,6 +70,11 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
     selection.deleteFromDocument()
     selection.getRangeAt(0).insertNode(document.createTextNode(paste))
     selection.collapseToEnd()
+   
+    onChange({
+      text: editorRef.current?.innerText || paste,
+      markup: utils.convertToMarkup(editorRef.current?.innerHTML || paste)
+    })
   }
 
   const keyUpListener = (e: KeyboardEvent) => {
@@ -191,6 +197,13 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
   }
 
   useEffect(() => {
+    if (defaultValue && editorRef.current) {
+      // editorRef.current 
+      editorRef.current.innerHTML = utils.convertMentions(defaultValue, mentions)
+    }
+  }, [defaultValue])
+
+  useEffect(() => {
     if (disabled && editorRef.current) {
 			editorRef.current.setAttribute('contenteditable', 'false')
 			editorRef.current.style.opacity = '0.5'
@@ -238,7 +251,7 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
             }
           }} 
           contentEditable
-          />
+        />
 			</div>
 			<div
         className={suggestionsClass}

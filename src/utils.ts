@@ -188,6 +188,20 @@ export const autoPositionCaret = (anchorNode: Node) => {
 //   }
 // }
 
+export const convertMentions = (str: string, mentions: Array<Mention>) => {
+  const mentionMarkupRegex = /__(.)\[([^\]]+)\]\(([^\)]+)\)__/g
+
+  return str.replace(mentionMarkupRegex, (match, p1, p2, p3) => {
+    const trigger = p1
+    const label = p2
+    const value = p3
+
+    const classname = mentions.find(m => m.trigger === trigger)?.mentionClassname
+    return `<span class="${classname}" trigger="${trigger}" value="${value}" contenteditable="false">${label}</span>`
+  })
+
+}
+
 export const debounce = (callback: Function, interval: number): Function => {
   let debounceTimeoutId: number
 
