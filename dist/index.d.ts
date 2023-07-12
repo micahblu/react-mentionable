@@ -1,5 +1,6 @@
 declare module 'react-mentionable/index' {
   export { default } from 'react-mentionable/react-mentionable';
+  export { convertFormattedMentions, debounce } from 'react-mentionable/utils';
 
 }
 declare module 'react-mentionable/react-mentionable' {
@@ -63,7 +64,8 @@ declare module 'react-mentionable/utils' {
   export const insertAtCaretPos: (parentEl: HTMLElement, insertEl: HTMLElement | ChildNode) => void;
   export const insertAfter: (newNode: Node, existingNode: Node) => void;
   export const autoPositionCaret: (anchorNode: Node) => void;
-  export const convertMentions: (str: string, mentions: Array<Mention>) => string;
+  export const convertToMentions: (str: string, mentions: Array<Mention>) => string;
+  export const convertFormattedMentions: (str: string, cb: (trigger: string, label: string, value: string) => string) => string;
   export const debounce: (callback: Function, interval: number) => Function;
   export const convertToMarkup: (html: string) => string;
 
