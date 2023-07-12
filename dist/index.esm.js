@@ -303,6 +303,10 @@ var ReactMentionable = forwardRef((props, ref) => {
     };
     editorRef.current.addEventListener("keydown", keyDownListener);
     editorRef.current.addEventListener("keyup", keyUpListener);
+    return () => {
+      editorRef.current?.removeEventListener("keydown", keyDownListener);
+      editorRef.current?.removeEventListener("keyup", keyUpListener);
+    };
   }, []);
   return /* @__PURE__ */ React.createElement(
     "div",
