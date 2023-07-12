@@ -188,6 +188,11 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
 
     editorRef.current.addEventListener('keydown', keyDownListener)
     editorRef.current.addEventListener('keyup', keyUpListener)
+
+    return () => {
+      editorRef.current?.removeEventListener('keydown', keyDownListener)
+      editorRef.current?.removeEventListener('keyup', keyUpListener)
+    }
   }, [])
 
   return (
