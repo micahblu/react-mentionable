@@ -62,7 +62,6 @@ declare module 'react-mentionable/utils' {
   export const insertAtCaretPos: (parentEl: HTMLElement, insertEl: HTMLElement | ChildNode) => void;
   export const insertAfter: (newNode: Node, existingNode: Node) => void;
   export const autoPositionCaret: (anchorNode: Node) => void;
-  export const scrollIntoView: (editorEl: HTMLElement) => void;
   export const debounce: (callback: Function, interval: number) => Function;
   export const convertToMarkup: (html: string) => string;
 

@@ -27,7 +27,6 @@ var insertMention = ({
   insertAfter(anchorTextNode, mentionEl);
   editorEl.removeChild(highlightEl);
   highlightEl.parentNode?.removeChild(highlightEl);
-  scrollIntoView(editorEl);
   autoPositionCaret(editorEl);
 };
 var removeHighlight = (editorEl, highlightEl) => {
@@ -64,19 +63,6 @@ var removeFontTags = (el) => {
     nodes[i].parentNode?.removeChild(nodes[i]);
   }
   autoPositionCaret(el);
-};
-var getLastElement = (parentEl, refNode) => {
-  const len = parentEl.childNodes.length - 1;
-  let lastElement;
-  for (let i = 0; i <= len; i++) {
-    const currentEl = parentEl.childNodes[i];
-    if (currentEl.nodeName !== "#text") {
-      lastElement = currentEl;
-    }
-    if (currentEl === refNode)
-      break;
-  }
-  return lastElement;
 };
 var getLastNode = (parentNode, refNode) => {
   if (!refNode) {
@@ -158,12 +144,6 @@ var autoPositionCaret = (anchorNode) => {
   if (!anchor)
     return;
   selection?.collapse(anchor, anchor.childNodes.length);
-};
-var scrollIntoView = (editorEl) => {
-  const lastElement = getLastElement(editorEl);
-  if (lastElement?.scrollIntoView) {
-    lastElement.scrollIntoView();
-  }
 };
 var convertToMarkup = (html) => {
   const mentionRegex = /(<[^>]+>)([^<]+)<\/[^>]+>/g;
@@ -318,7 +298,6 @@ var ReactMentionable = forwardRef((props, ref) => {
         insertAtCaretPos(editorRef.current, highlightEl.current);
         setShowSuggestions(true);
         autoPositionCaret(highlightEl.current);
-        scrollIntoView(editorRef.current);
         e.preventDefault();
       }
     };
