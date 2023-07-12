@@ -1,6 +1,6 @@
-# React Mentions 
+# React Mentionable 
 
-React Mentions is a react component that allows for inlining mentions or tag labels in a text field. It supports multiple tags triggered by a configured trigger character. `onChange` will return an object with text and markup.
+React Mentionable is a react component that allows for inlining mentions or tag labels in a text field. It supports multiple tags triggered by a configured trigger character. `onChange` will return an object with text and markup.
 
 ### Getting started
 ```
