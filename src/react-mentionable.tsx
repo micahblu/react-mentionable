@@ -58,6 +58,138 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
     setShowSuggestions(false)
     isMatching.current = false
   }
+
+  const onPasteListener = (e: ClipboardEvent) => {
+    e.preventDefault()
+    const paste = e.clipboardData?.getData('text') || ''
+
+    const selection = window.getSelection()
+
+    if (!selection?.rangeCount) return
+    selection.deleteFromDocument()
+    selection.getRangeAt(0).insertNode(document.createTextNode(paste))
+    selection.collapseToEnd()
+  }
+
+  const keyUpListener = (e: KeyboardEvent) => {
+    if (!editorRef.current) return
+
+    utils.removeFontTags(editorRef.current)
+    const key = e.key || utils.getLastKeyStroke(editorRef.current)
+    if (isMatching.current && key === 'Tab' || key === ' ') {
+      const lastNode = utils.getLastNode(editorRef.current)
+      if (!lastNode) return
+
+      const nodeText: string = lastNode?.nodeValue?.replace(currentTrigger.current || '', '').toLowerCase() || ''
+
+      if (highlightEl.current 
+        && (matches.current.length === 1
+          && isMatching.current)
+        || matches.current.map(m => m.label).includes(nodeText)
+      ) {
+        utils.insertMention({
+          mentionClassname: mentions.find(m => m.trigger === currentTrigger.current)?.mentionClassname || '',
+          trigger: currentTrigger.current || '',
+          value: matches.current[0].value,
+          editorEl: editorRef.current,
+          label: matches.current[0].label, 
+          highlightEl: highlightEl.current as HTMLElement
+        })
+      } else if (isMatching.current && matches.current.length !== 1) {
+        utils.removeHighlight(editorRef.current, highlightEl.current as HTMLElement)
+        utils.autoPositionCaret(editorRef.current)
+      }
+      isMatching.current = false
+      setShowSuggestions(false)
+    }
+    // if deleting last char, stop matching and hide suggestions
+    else if (key === 'Backspace') {
+      e.preventDefault()
+      const selection = window.getSelection()
+      const anchorNode = selection?.anchorNode
+      if (!anchorNode) return
+      const last = anchorNode.childNodes.length || 0
+      const lastAnchorChild = anchorNode.childNodes[last - 1]
+      if (lastAnchorChild?.nodeValue === '') {
+        lastAnchorChild?.parentNode?.removeChild(lastAnchorChild)
+      }
+      // remove trailing breaks, relative to the anchorNode
+      utils.removeTrailingBreaks(anchorNode)
+
+      // remove trailing breaks that may sneak in, from the end of the editor
+      utils.removeTrailingBreaks(editorRef.current)
+
+      if (highlightEl.current?.innerText.length === 1) {
+        e.preventDefault()
+        setShowSuggestions(false)
+        isMatching.current = false
+      }
+    }
+    else if (isMatching.current && key !== currentTrigger.current) {
+      const inputStr = highlightEl.current?.innerText || ''
+      const symbolIndex = inputStr.lastIndexOf(currentTrigger.current || '')
+      const searchStr = inputStr.substr(symbolIndex + 1).replace(/[^\w]/, '')
+      const regex = new RegExp(searchStr, 'i')
+
+      const mention = mentions.find(m => m.trigger === currentTrigger.current)
+
+      const suggestions = mentions.find(m => m.trigger === currentTrigger.current)?.suggestions as Array<Suggestion>
+      if (Array.isArray(mention?.suggestions)) {
+        if (suggestions) {
+          matches.current = suggestions.filter((suggestion) => regex.test(suggestion.label))
+          setSuggestions(matches.current)
+        }
+      } else {
+        mention?.suggestions(searchStr).then((suggested: Array<Suggestion>) => {
+          matches.current = suggested.filter((suggestion) => regex.test(suggestion.label))
+          setSuggestions(matches.current)
+        })
+      }
+    }
+
+    onChange({
+      text: editorRef.current.innerText,
+      markup: utils.convertToMarkup(editorRef.current.innerHTML)
+    })
+  }
+    
+  const keyDownListener = (e: KeyboardEvent) => {
+    const key = e.key || utils.getLastKeyStroke(editorRef.current)
+
+    if (!key || !editorRef.current || typeof document === 'undefined') return
+    if (key === 'Enter') {
+      e.preventDefault()
+      const br = document.createElement('br')
+      const textNode = document.createTextNode('\u200B')
+      utils.insertAtCaretPos(editorRef.current, br)
+      utils.insertAfter(textNode, br)
+      utils.autoPositionCaret(editorRef.current)
+    }
+    else if (key === 'Tab') e.preventDefault()
+    else if (triggers.includes(key)) {
+      if (isMatching.current) {
+        // Prevent reentering triggering symbol if already matching
+        e.preventDefault()
+        return
+      }
+
+      currentTrigger.current = key
+      isMatching.current = true
+
+      highlightEl.current = document.createElement('span')
+      highlightEl.current.className = `${mentions.find(m => m.trigger === currentTrigger.current)?.highlightClassName}`
+      highlightEl.current.innerText = currentTrigger.current 
+      highlightEl.current.setAttribute('contentEditable', 'true')
+
+      utils.insertAtCaretPos(editorRef.current, highlightEl.current)
+
+      setShowSuggestions(true)
+      utils.autoPositionCaret(highlightEl.current)
+
+      e.preventDefault()
+    }
+  }
+
   useEffect(() => {
     if (disabled && editorRef.current) {
 			editorRef.current.setAttribute('contenteditable', 'false')
@@ -67,131 +199,14 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
 
   useLayoutEffect(() => {
     if (!editorRef?.current || typeof document === 'undefined') return
-    const keyUpListener = (e: KeyboardEvent) => {
-      if (!editorRef.current) return
-
-      utils.removeFontTags(editorRef.current)
-      const key = e.key || utils.getLastKeyStroke(editorRef.current)
-      if (isMatching.current && key === 'Tab' || key === ' ') {
-				const lastNode = utils.getLastNode(editorRef.current)
-        if (!lastNode) return
-
-        const nodeText: string = lastNode?.nodeValue?.replace(currentTrigger.current || '', '').toLowerCase() || ''
-
-				if (highlightEl.current 
-          && (matches.current.length === 1
-          && isMatching.current)
-          || matches.current.map(m => m.label).includes(nodeText)
-        ) {
-          utils.insertMention({
-            mentionClassname: mentions.find(m => m.trigger === currentTrigger.current)?.mentionClassname || '',
-            trigger: currentTrigger.current || '',
-            value: matches.current[0].value,
-            editorEl: editorRef.current,
-            label: matches.current[0].label, 
-            highlightEl: highlightEl.current as HTMLElement
-          })
-				} else if (isMatching.current && matches.current.length !== 1) {
-					utils.removeHighlight(editorRef.current, highlightEl.current as HTMLElement)
-					utils.autoPositionCaret(editorRef.current)
-				}
-        isMatching.current = false
-        setShowSuggestions(false)
-      }
-      // if deleting last char, stop matching and hide suggestions
-      else if (key === 'Backspace') {
-        e.preventDefault()
-        const selection = window.getSelection()
-        const anchorNode = selection?.anchorNode
-        if (!anchorNode) return
-        const last = anchorNode.childNodes.length || 0
-        const lastAnchorChild = anchorNode.childNodes[last - 1]
-        if (lastAnchorChild?.nodeValue === '') {
-          lastAnchorChild?.parentNode?.removeChild(lastAnchorChild)
-        }
-        // remove trailing breaks, relative to the anchorNode
-        utils.removeTrailingBreaks(anchorNode)
-        
-        // remove trailing breaks that may sneak in, from the end of the editor
-        utils.removeTrailingBreaks(editorRef.current)
-
-        if (highlightEl.current?.innerText.length === 1) {
-          e.preventDefault()
-          setShowSuggestions(false)
-          isMatching.current = false
-        }
-      }
-      else if (isMatching.current && key !== currentTrigger.current) {
-				const inputStr = highlightEl.current?.innerText || ''
-				const symbolIndex = inputStr.lastIndexOf(currentTrigger.current || '')
-				const searchStr = inputStr.substr(symbolIndex + 1).replace(/[^\w]/, '')
-				const regex = new RegExp(searchStr, 'i')
-
-        const mention = mentions.find(m => m.trigger === currentTrigger.current)
-
-        const suggestions = mentions.find(m => m.trigger === currentTrigger.current)?.suggestions as Array<Suggestion>
-        if (Array.isArray(mention?.suggestions)) {
-          if (suggestions) {
-            matches.current = suggestions.filter((suggestion) => regex.test(suggestion.label))
-            setSuggestions(matches.current)
-          }
-        } else {
-          mention?.suggestions(searchStr).then((suggested: Array<Suggestion>) => {
-            matches.current = suggested.filter((suggestion) => regex.test(suggestion.label))
-            setSuggestions(matches.current)
-          })
-        }
-			}
-
-      onChange({
-				text: editorRef.current.innerText,
-        markup: utils.convertToMarkup(editorRef.current.innerHTML)
-			})
-    }
-    
-    const keyDownListener = (e: KeyboardEvent) => {
-      const key = e.key || utils.getLastKeyStroke(editorRef.current)
-
-      if (!key || !editorRef.current || typeof document === 'undefined') return
-      if (key === 'Enter') {
-        e.preventDefault()
-        const br = document.createElement('br')
-        const textNode = document.createTextNode('\u200B')
-        utils.insertAtCaretPos(editorRef.current, br)
-        utils.insertAfter(textNode, br)
-        utils.autoPositionCaret(editorRef.current)
-      }
-      else if (key === 'Tab') e.preventDefault()
-      else if (triggers.includes(key)) {
-        if (isMatching.current) {
-          // Prevent reentering triggering symbol if already matching
-          e.preventDefault()
-          return
-        }
-
-        currentTrigger.current = key
-        isMatching.current = true
-
-        highlightEl.current = document.createElement('span')
-        highlightEl.current.className = `${mentions.find(m => m.trigger === currentTrigger.current)?.highlightClassName}`
-        highlightEl.current.innerText = currentTrigger.current 
-        highlightEl.current.setAttribute('contentEditable', 'true')
-
-        utils.insertAtCaretPos(editorRef.current, highlightEl.current)
-
-        setShowSuggestions(true)
-        utils.autoPositionCaret(highlightEl.current)
-
-        e.preventDefault()
-			}
-    }
 
     editorRef.current.addEventListener('keydown', keyDownListener)
     editorRef.current.addEventListener('keyup', keyUpListener)
-
+    editorRef.current.addEventListener('paste', onPasteListener)
     return () => {
       editorRef.current?.removeEventListener('keydown', keyDownListener)
       editorRef.current?.removeEventListener('keyup', keyUpListener)
+      editorRef.current?.removeEventListener('paste', onPasteListener)
     }
   }, [])
 
