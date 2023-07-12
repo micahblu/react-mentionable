@@ -325,34 +325,67 @@ var ReactMentionable = forwardRef((props, ref) => {
     editorRef.current.addEventListener("keydown", keyDownListener);
     editorRef.current.addEventListener("keyup", keyUpListener);
   }, []);
-  return /* @__PURE__ */ React.createElement("div", { className: "react-mentionable" }, /* @__PURE__ */ React.createElement("div", { className: "react-mentionable-editor-container" }, /* @__PURE__ */ React.createElement(
+  return /* @__PURE__ */ React.createElement(
     "div",
     {
-      placeholder: placeHolder,
-      className: `react-mentionable-input ${inputClass}`,
-      ref: (node) => {
-        editorRef.current = node;
-        if (typeof ref === "function") {
-          ref(node);
-        } else if (ref) {
-          ref.current;
-        }
-      },
-      contentEditable: true
-    }
-  )), showSuggestions && /* @__PURE__ */ React.createElement("div", { className: `react-mentionable-suggestions ${suggestionsClass}` }, suggestions && suggestions.map((suggestion) => {
-    if (renderSuggestion)
-      return renderSuggestion(suggestion, selectSuggestion);
-    return /* @__PURE__ */ React.createElement(
+      className: "react-mentionable",
+      style: {
+        position: "relative"
+      }
+    },
+    /* @__PURE__ */ React.createElement(
       "div",
       {
-        onClick: () => selectSuggestion(suggestion),
-        key: suggestion.label,
-        className: "react-mentionable-suggestion"
+        className: "react-mentionable-editor-container",
+        style: {
+          position: "relative"
+        }
       },
-      suggestion.label
-    );
-  })));
+      /* @__PURE__ */ React.createElement(
+        "div",
+        {
+          placeholder: placeHolder,
+          className: `react-mentionable-input ${inputClass}`,
+          style: {
+            padding: "0.5rem"
+          },
+          ref: (node) => {
+            editorRef.current = node;
+            if (typeof ref === "function") {
+              ref(node);
+            } else if (ref) {
+              ref.current;
+            }
+          },
+          contentEditable: true
+        }
+      )
+    ),
+    /* @__PURE__ */ React.createElement(
+      "div",
+      {
+        className: suggestionsClass,
+        style: {
+          opacity: `${showSuggestions ? "1" : "0"}`,
+          position: "absolute",
+          width: "100%"
+        }
+      },
+      suggestions && suggestions.map((suggestion) => {
+        if (renderSuggestion)
+          return renderSuggestion(suggestion, selectSuggestion);
+        return /* @__PURE__ */ React.createElement(
+          "div",
+          {
+            onClick: () => selectSuggestion(suggestion),
+            key: suggestion.label,
+            className: "react-mentionable-suggestion"
+          },
+          suggestion.label
+        );
+      })
+    )
+  );
 });
 var react_mentionable_default = ReactMentionable;
 export {

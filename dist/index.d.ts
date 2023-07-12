@@ -4,7 +4,6 @@ declare module 'react-mentionable/index' {
 }
 declare module 'react-mentionable/react-mentionable' {
   import React from 'react';
-  import './styles.css';
   export type Suggestion = {
       label: string;
       value: string;
