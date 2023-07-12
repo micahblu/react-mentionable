@@ -44,6 +44,7 @@ declare module 'react-mentionable/stories/ReactMentionable.stories' {
 
 }
 declare module 'react-mentionable/utils' {
+  import type { Mention } from "react-mentionable/react-mentionable";
   export const getLastKeyStroke: (el: HTMLDivElement | null) => string | undefined;
   export const insertMention: ({ mentionClassname, editorEl, highlightEl, value, label, trigger }: {
       mentionClassname: string;
@@ -62,6 +63,7 @@ declare module 'react-mentionable/utils' {
   export const insertAtCaretPos: (parentEl: HTMLElement, insertEl: HTMLElement | ChildNode) => void;
   export const insertAfter: (newNode: Node, existingNode: Node) => void;
   export const autoPositionCaret: (anchorNode: Node) => void;
+  export const convertMentions: (str: string, mentions: Array<Mention>) => string;
   export const debounce: (callback: Function, interval: number) => Function;
   export const convertToMarkup: (html: string) => string;
 

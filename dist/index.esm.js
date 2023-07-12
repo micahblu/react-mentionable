@@ -145,6 +145,16 @@ var autoPositionCaret = (anchorNode) => {
     return;
   selection?.collapse(anchor, anchor.childNodes.length);
 };
+var convertMentions = (str, mentions) => {
+  const mentionMarkupRegex = /__(.)\[([^\]]+)\]\(([^\)]+)\)__/g;
+  return str.replace(mentionMarkupRegex, (match, p1, p2, p3) => {
+    const trigger = p1;
+    const label = p2;
+    const value = p3;
+    const classname = mentions.find((m) => m.trigger === trigger)?.mentionClassname;
+    return `<span class="${classname}" trigger="${trigger}" value="${value}" contenteditable="false">${label}</span>`;
+  });
+};
 var convertToMarkup = (html) => {
   const mentionRegex = /(<[^>]+>)([^<]+)<\/[^>]+>/g;
   const convertedMarkup = html.replace(/&nbsp;/g, " ").replace(mentionRegex, (match, p1, p2) => {
@@ -166,6 +176,7 @@ var convertToMarkup = (html) => {
 var ReactMentionable = forwardRef((props, ref) => {
   const {
     placeHolder,
+    defaultValue,
     inputClass,
     suggestionsClass,
     mentions,
@@ -204,6 +215,10 @@ var ReactMentionable = forwardRef((props, ref) => {
     selection.deleteFromDocument();
     selection.getRangeAt(0).insertNode(document.createTextNode(paste));
     selection.collapseToEnd();
+    onChange({
+      text: editorRef.current?.innerText || paste,
+      markup: convertToMarkup(editorRef.current?.innerHTML || paste)
+    });
   };
   const keyUpListener = (e) => {
     if (!editorRef.current)
@@ -302,6 +317,11 @@ var ReactMentionable = forwardRef((props, ref) => {
       e.preventDefault();
     }
   };
+  useEffect(() => {
+    if (defaultValue && editorRef.current) {
+      editorRef.current.innerHTML = convertMentions(defaultValue, mentions);
+    }
+  }, [defaultValue]);
   useEffect(() => {
     if (disabled && editorRef.current) {
       editorRef.current.setAttribute("contenteditable", "false");
