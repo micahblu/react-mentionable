@@ -181,7 +181,7 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
 
         setShowSuggestions(true)
         utils.autoPositionCaret(highlightEl.current)
-        utils.scrollIntoView(editorRef.current)
+
         e.preventDefault()
 			}
     }

@@ -43,30 +43,39 @@ const Demo = () => {
   }
 
   return (
-    <ReactMentionable
-      ref={editorRef}
-      placeHolder='What is on your mind?'
-      inputClass='inputClass'
-      onChange={({ text, markup }) => {
-        // console.log('onChange', markup)
-      }}
-      mentions={[{
-        trigger: '@',
-        highlightClassName: 'highlight',
-        mentionClassname: 'mention',
-        suggestions: (searchStr: string) => fetchSuggestions(searchStr) 
-      }]}
-      renderSuggestion={(suggestion, selectSuggestion) => (
-        <div
-          onClick={() => selectSuggestion(suggestion)}
-          key={suggestion.label}
-          className='react-mentionable-suggestion'
-          style={{ borderBottom: '1px solid #ccc', padding: '1rem', cursor: 'pointer' }}
-        >
-					{ suggestion.label }
-				</div>
-      )}
-    />
+    <>
+      <ReactMentionable
+        ref={editorRef}
+        placeHolder='What is on your mind?'
+        inputClass='inputClass'
+        suggestionsClass='suggestions'
+        onChange={({ text, markup }) => {
+          // console.log('onChange', markup)
+        }}
+        mentions={[{
+          trigger: '@',
+          highlightClassName: 'highlight',
+          mentionClassname: 'mention',
+          suggestions: (searchStr: string) => fetchSuggestions(searchStr) 
+        }]}
+        renderSuggestion={(suggestion, selectSuggestion) => (
+          <div
+            onClick={() => selectSuggestion(suggestion)}
+            key={suggestion.label}
+            className='react-mentionable-suggestion'
+            style={{ borderBottom: '1px solid #ccc', padding: '1rem', cursor: 'pointer' }}
+          >
+            { suggestion.label }
+          </div>
+        )}
+      />
+      <br />
+      <div style={{width: '100%', height: '500px', background: 'green' }} />
+      <br />
+      <div style={{width: '100%', height: '500px', background: 'blue' }} />
+      <br />
+      <div style={{width: '100%', height: '500px', background: 'red' }} />
+    </>
   )
 }
 

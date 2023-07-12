@@ -34,7 +34,6 @@ export const insertMention = ({
   // remove highlight el
   highlightEl.parentNode?.removeChild(highlightEl) 
 
-  scrollIntoView(editorEl)
   autoPositionCaret(editorEl)
 }
 export const removeHighlight = (editorEl: HTMLDivElement, highlightEl: HTMLElement) => {
@@ -182,12 +181,12 @@ export const autoPositionCaret = (anchorNode: Node) => {
 }
 
 // Horizontal scroll into view, for overflow text
-export const scrollIntoView = (editorEl: HTMLElement) => {
-  const lastElement = getLastElement(editorEl)
-  if (lastElement?.scrollIntoView) {
-    lastElement.scrollIntoView()
-  }
-}
+// export const scrollIntoView = (editorEl: HTMLElement) => {
+//   const lastElement = getLastElement(editorEl)
+//   if (lastElement?.scrollIntoView) {
+//     lastElement.scrollIntoView()
+//   }
+// }
 
 export const debounce = (callback: Function, interval: number): Function => {
   let debounceTimeoutId: number
