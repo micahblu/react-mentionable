@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect, useLayoutEffect, forwardRef } from 'react'
 import * as utils from './utils'
-import './styles.css'
 
 export type Suggestion = {
   label: string
@@ -192,11 +191,24 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
   }, [])
 
   return (
-    <div className='react-mentionable'>
-			<div className='react-mentionable-editor-container'>
+    <div
+      className='react-mentionable'
+      style={{
+        position: 'relative'
+      }}
+    >
+			<div
+        className='react-mentionable-editor-container'
+        style={{
+          position: 'relative'
+        }}
+      >
 			  <div
           placeholder={placeHolder}
           className={`react-mentionable-input ${inputClass}`}
+          style={{
+            padding: '0.5rem'
+          }}
           ref={(node) => {
             editorRef.current = node
             if (typeof ref === 'function') {
@@ -208,22 +220,27 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
           contentEditable
           />
 			</div>
-			{showSuggestions && (
-				<div className={`react-mentionable-suggestions ${suggestionsClass}`}>
-					{suggestions && suggestions.map((suggestion) => {
-            if (renderSuggestion) return renderSuggestion(suggestion, selectSuggestion)
-            return (
-						  <div
-                onClick={() => selectSuggestion(suggestion)}
-                key={suggestion.label}
-                className='react-mentionable-suggestion'
-              >
-							  { suggestion.label }
-						  </div>
-            )
-          })}
-				</div>
-			)}
+			<div
+        className={suggestionsClass}
+        style={{
+          opacity: `${showSuggestions ? '1' : '0'}`,
+          position: 'absolute',
+          width: '100%'
+        }}
+      >
+        {suggestions && suggestions.map((suggestion) => {
+          if (renderSuggestion) return renderSuggestion(suggestion, selectSuggestion)
+          return (
+            <div
+              onClick={() => selectSuggestion(suggestion)}
+              key={suggestion.label}
+              className='react-mentionable-suggestion'
+            >
+              { suggestion.label }
+            </div>
+          )
+        })}
+      </div>
 		</div>
   )
 }) 
