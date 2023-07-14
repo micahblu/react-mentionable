@@ -12,7 +12,6 @@ import './DemoStyles.css'
 const Demo = () => {
   const markup = 'The two GOATS of all time have to be __@[Mike Tyson](/people/mike-tyson)__  and __@[Tom Brady](/people/mike-tyson)__!'
   const toLinks = convertFormattedMentions(markup, (trigger: string, label: string, value: string) => {
-    console.log('trigger, label, value', trigger, label, value)
     return `<a href="${value}">${label}</a>`
   })
   console.log('toLinks', toLinks)
@@ -54,7 +53,7 @@ const Demo = () => {
         ref={editorRef}
         placeHolder='What is on your mind?'
         inputClass='inputClass'
-        defaultValue={markup}
+        defaultValue={''}
         suggestionsClass='suggestions'
         onChange={({ text, markup }) => {
           console.log('onChange', markup)

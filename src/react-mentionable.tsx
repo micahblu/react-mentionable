@@ -108,6 +108,28 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
       isMatching.current = false
       setShowSuggestions(false)
     }
+    
+    else if (isMatching.current && key !== currentTrigger.current) {
+      const inputStr = highlightEl.current?.innerText || ''
+      const symbolIndex = inputStr.lastIndexOf(currentTrigger.current || '')
+      const searchStr = inputStr.substr(symbolIndex + 1).replace(/[^\w]/, '')
+      const regex = new RegExp(searchStr, 'i')
+
+      const mention = mentions.find(m => m.trigger === currentTrigger.current)
+
+      const suggestions = mentions.find(m => m.trigger === currentTrigger.current)?.suggestions as Array<Suggestion>
+      if (Array.isArray(mention?.suggestions)) {
+        if (suggestions) {
+          matches.current = suggestions.filter((suggestion) => regex.test(suggestion.label))
+          setSuggestions(matches.current)
+        }
+      } else {
+        mention?.suggestions(searchStr).then((suggested: Array<Suggestion>) => {
+          matches.current = suggested.filter((suggestion) => regex.test(suggestion.label))
+          setSuggestions(matches.current)
+        })
+      }
+    }
     // if deleting last char, stop matching and hide suggestions
     else if (key === 'Backspace') {
       e.preventDefault()
@@ -129,27 +151,6 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
         e.preventDefault()
         setShowSuggestions(false)
         isMatching.current = false
-      }
-    }
-    else if (isMatching.current && key !== currentTrigger.current) {
-      const inputStr = highlightEl.current?.innerText || ''
-      const symbolIndex = inputStr.lastIndexOf(currentTrigger.current || '')
-      const searchStr = inputStr.substr(symbolIndex + 1).replace(/[^\w]/, '')
-      const regex = new RegExp(searchStr, 'i')
-
-      const mention = mentions.find(m => m.trigger === currentTrigger.current)
-
-      const suggestions = mentions.find(m => m.trigger === currentTrigger.current)?.suggestions as Array<Suggestion>
-      if (Array.isArray(mention?.suggestions)) {
-        if (suggestions) {
-          matches.current = suggestions.filter((suggestion) => regex.test(suggestion.label))
-          setSuggestions(matches.current)
-        }
-      } else {
-        mention?.suggestions(searchStr).then((suggested: Array<Suggestion>) => {
-          matches.current = suggested.filter((suggestion) => regex.test(suggestion.label))
-          setSuggestions(matches.current)
-        })
       }
     }
 
