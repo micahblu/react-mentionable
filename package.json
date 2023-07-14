@@ -1,7 +1,7 @@
 {
   "name": "react-mentionable",
   "description": "A component that allows custom mentions of people or tags",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "author": "Micah Blu",
   "license": "MIT",
   "private": false,
