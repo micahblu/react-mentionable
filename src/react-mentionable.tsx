@@ -44,17 +44,17 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
   let isMatching = useRef<boolean>(false)
   let currentTrigger = useRef<string | undefined>()
   let matches =  useRef<Array<Suggestion>>([])
-  let highlightEl = useRef<HTMLElement | undefined>() 
 
   const selectSuggestion = (suggestion: Suggestion) => {
-    if (!editorRef.current || !highlightEl.current) return
+    const highlightEl = document.getElementsByClassName('highlight')[0] as HTMLSpanElement 
+    if (!editorRef.current || !highlightEl) return
     utils.insertMention({
       mentionClassname: mentions.find(m => m.trigger === currentTrigger.current)?.mentionClassname || '',
       trigger: currentTrigger.current || '',
       value: suggestion.value,
       editorEl: editorRef.current,
       label: suggestion.label, 
-      highlightEl: highlightEl.current as HTMLElement 
+      highlightEl: highlightEl 
     })
     setShowSuggestions(false)
     isMatching.current = false
@@ -79,7 +79,8 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
 
   const keyUpListener = (e: KeyboardEvent) => {
     if (!editorRef.current) return
-
+    const highlightEl = document.getElementsByClassName('highlight')[0] as HTMLSpanElement 
+    
     utils.removeFontTags(editorRef.current)
     const key = e.key || utils.getLastKeyStroke(editorRef.current)
     if (isMatching.current && key === 'Tab' || key === ' ') {
@@ -88,7 +89,7 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
 
       const nodeText: string = lastNode?.nodeValue?.replace(currentTrigger.current || '', '').toLowerCase() || ''
 
-      if (highlightEl.current 
+      if (highlightEl 
         && (matches.current.length === 1
           && isMatching.current)
         || matches.current.map(m => m.label).includes(nodeText)
@@ -99,10 +100,10 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
           value: matches.current[0].value,
           editorEl: editorRef.current,
           label: matches.current[0].label, 
-          highlightEl: highlightEl.current as HTMLElement
+          highlightEl: highlightEl
         })
-      } else if (isMatching.current && matches.current.length !== 1) {
-        utils.removeHighlight(editorRef.current, highlightEl.current as HTMLElement)
+      } else if (isMatching.current && matches.current.length !== 1 && highlightEl) {
+        utils.removeHighlight(editorRef.current, highlightEl)
         utils.autoPositionCaret(editorRef.current)
       }
       isMatching.current = false
@@ -110,7 +111,7 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
     }
     
     else if (isMatching.current && key !== currentTrigger.current) {
-      const inputStr = highlightEl.current?.innerText || ''
+      const inputStr = highlightEl?.innerText || ''
       const symbolIndex = inputStr.lastIndexOf(currentTrigger.current || '')
       const searchStr = inputStr.substr(symbolIndex + 1).replace(/[^\w]/, '')
       const regex = new RegExp(searchStr, 'i')
@@ -130,12 +131,13 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
         })
       }
     }
-    // if deleting last char, stop matching and hide suggestions
-    else if (key === 'Backspace') {
-      e.preventDefault()
+   
+    if (key === 'Backspace') {
       const selection = window.getSelection()
       const anchorNode = selection?.anchorNode
       if (!anchorNode) return
+
+      // It may be necessary to remove unecessary brower added br tags
       const last = anchorNode.childNodes.length || 0
       const lastAnchorChild = anchorNode.childNodes[last - 1]
       if (lastAnchorChild?.nodeValue === '') {
@@ -146,9 +148,9 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
 
       // remove trailing breaks that may sneak in, from the end of the editor
       utils.removeTrailingBreaks(editorRef.current)
-
-      if (highlightEl.current?.innerText.length === 1) {
-        e.preventDefault()
+     
+      // If the highlighted element was removed, hide suggestions, stop matching
+      if (!highlightEl) {
         setShowSuggestions(false)
         isMatching.current = false
       }
@@ -182,16 +184,15 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
 
       currentTrigger.current = key
       isMatching.current = true
+      const highlightSpan = document.createElement('span')
+      highlightSpan.className = `${mentions.find(m => m.trigger === currentTrigger.current)?.highlightClassName}`
+      highlightSpan.innerText = currentTrigger.current 
+      highlightSpan.setAttribute('contentEditable', 'true')
 
-      highlightEl.current = document.createElement('span')
-      highlightEl.current.className = `${mentions.find(m => m.trigger === currentTrigger.current)?.highlightClassName}`
-      highlightEl.current.innerText = currentTrigger.current 
-      highlightEl.current.setAttribute('contentEditable', 'true')
-
-      utils.insertAtCaretPos(editorRef.current, highlightEl.current)
+      utils.insertAtCaretPos(editorRef.current, highlightSpan)
 
       setShowSuggestions(true)
-      utils.autoPositionCaret(highlightEl.current)
+      utils.autoPositionCaret(highlightSpan)
 
       e.preventDefault()
     }

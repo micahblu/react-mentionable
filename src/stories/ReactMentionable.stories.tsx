@@ -14,31 +14,32 @@ const Demo = () => {
   const toLinks = convertFormattedMentions(markup, (trigger: string, label: string, value: string) => {
     return `<a href="${value}">${label}</a>`
   })
+  const suggestions = [{
+    label: 'Albert Einstein',
+    value: '/people/albert-einstein',
+    handle: '@alberteinstein',
+    avatar: '/images/albert-einstein.jpg'
+  }, {
+      label: 'Elon Musk',
+      value: '/people/elon-musk',
+      handle: '@elonmusk',
+      avatar: '/images/elon-musk.jpg'
+    }, {
+      label: 'Mike Tyson',
+      value: '/people/mike-tyson',
+      handle: '@miketyson',
+      avatar: '/images/mike-tyson.jpg'
+    }, {
+      label: 'Tom Brady',
+      value: '/people/mike-tyson',
+      handle: '@tombrady',
+      avatar: '/images/tom-brady.jpg'
+    }]
   console.log('toLinks', toLinks)
   const editorRef = useRef<HTMLDivElement | null>(null)
   const apiCall = debounce((resolve: Function) => {
     window.setTimeout(() => {
-      resolve([{
-        label: 'Albert Einstein',
-        value: '/people/albert-einstein',
-        handle: '@alberteinstein',
-        avatar: '/images/albert-einstein.jpg'
-      }, {
-        label: 'Elon Musk',
-        value: '/people/elon-musk',
-        handle: '@elonmusk',
-        avatar: '/images/elon-musk.jpg'
-      }, {
-        label: 'Mike Tyson',
-        value: '/people/mike-tyson',
-        handle: '@miketyson',
-        avatar: '/images/mike-tyson.jpg'
-      }, {
-        label: 'Tom Brady',
-        value: '/people/mike-tyson',
-        handle: '@tombrady',
-        avatar: '/images/tom-brady.jpg'
-      }]) 
+      resolve(suggestions) 
     }, 200)
   }, 100)
   const fetchSuggestions = async (searchStr: string): Promise<Array<Suggestion>> => {
@@ -56,13 +57,14 @@ const Demo = () => {
         defaultValue={''}
         suggestionsClass='suggestions'
         onChange={({ text, markup }) => {
-          console.log('onChange', markup)
+          // console.log('onChange', markup)
         }}
         mentions={[{
           trigger: '@',
           highlightClassName: 'highlight',
           mentionClassname: 'mention',
-          suggestions: (searchStr: string) => fetchSuggestions(searchStr) 
+          // suggestions: (searchStr: string) => fetchSuggestions(searchStr) 
+          suggestions
         }]}
         renderSuggestion={(suggestion, selectSuggestion) => (
           <div
