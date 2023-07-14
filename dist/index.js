@@ -299,24 +299,6 @@ var ReactMentionable = (0, import_react.forwardRef)((props, ref) => {
       }
       isMatching.current = false;
       setShowSuggestions(false);
-    } else if (key === "Backspace") {
-      e.preventDefault();
-      const selection = window.getSelection();
-      const anchorNode = selection?.anchorNode;
-      if (!anchorNode)
-        return;
-      const last = anchorNode.childNodes.length || 0;
-      const lastAnchorChild = anchorNode.childNodes[last - 1];
-      if (lastAnchorChild?.nodeValue === "") {
-        lastAnchorChild?.parentNode?.removeChild(lastAnchorChild);
-      }
-      removeTrailingBreaks(anchorNode);
-      removeTrailingBreaks(editorRef.current);
-      if (highlightEl.current?.innerText.length === 1) {
-        e.preventDefault();
-        setShowSuggestions(false);
-        isMatching.current = false;
-      }
     } else if (isMatching.current && key !== currentTrigger.current) {
       const inputStr = highlightEl.current?.innerText || "";
       const symbolIndex = inputStr.lastIndexOf(currentTrigger.current || "");
@@ -334,6 +316,24 @@ var ReactMentionable = (0, import_react.forwardRef)((props, ref) => {
           matches.current = suggested.filter((suggestion) => regex.test(suggestion.label));
           setSuggestions(matches.current);
         });
+      }
+    } else if (key === "Backspace") {
+      e.preventDefault();
+      const selection = window.getSelection();
+      const anchorNode = selection?.anchorNode;
+      if (!anchorNode)
+        return;
+      const last = anchorNode.childNodes.length || 0;
+      const lastAnchorChild = anchorNode.childNodes[last - 1];
+      if (lastAnchorChild?.nodeValue === "") {
+        lastAnchorChild?.parentNode?.removeChild(lastAnchorChild);
+      }
+      removeTrailingBreaks(anchorNode);
+      removeTrailingBreaks(editorRef.current);
+      if (highlightEl.current?.innerText.length === 1) {
+        e.preventDefault();
+        setShowSuggestions(false);
+        isMatching.current = false;
       }
     }
     onChange({
