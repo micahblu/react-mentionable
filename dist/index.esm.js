@@ -207,9 +207,9 @@ var ReactMentionable = forwardRef((props, ref) => {
   let isMatching = useRef(false);
   let currentTrigger = useRef();
   let matches = useRef([]);
-  let highlightEl = useRef();
   const selectSuggestion = (suggestion) => {
-    if (!editorRef.current || !highlightEl.current)
+    const highlightEl = document.getElementsByClassName("highlight")[0];
+    if (!editorRef.current || !highlightEl)
       return;
     insertMention({
       mentionClassname: mentions.find((m) => m.trigger === currentTrigger.current)?.mentionClassname || "",
@@ -217,7 +217,7 @@ var ReactMentionable = forwardRef((props, ref) => {
       value: suggestion.value,
       editorEl: editorRef.current,
       label: suggestion.label,
-      highlightEl: highlightEl.current
+      highlightEl
     });
     setShowSuggestions(false);
     isMatching.current = false;
@@ -239,6 +239,7 @@ var ReactMentionable = forwardRef((props, ref) => {
   const keyUpListener = (e) => {
     if (!editorRef.current)
       return;
+    const highlightEl = document.getElementsByClassName("highlight")[0];
     removeFontTags(editorRef.current);
     const key = e.key || getLastKeyStroke(editorRef.current);
     if (isMatching.current && key === "Tab" || key === " ") {
@@ -246,23 +247,23 @@ var ReactMentionable = forwardRef((props, ref) => {
       if (!lastNode)
         return;
       const nodeText = lastNode?.nodeValue?.replace(currentTrigger.current || "", "").toLowerCase() || "";
-      if (highlightEl.current && (matches.current.length === 1 && isMatching.current) || matches.current.map((m) => m.label).includes(nodeText)) {
+      if (highlightEl && (matches.current.length === 1 && isMatching.current) || matches.current.map((m) => m.label).includes(nodeText)) {
         insertMention({
           mentionClassname: mentions.find((m) => m.trigger === currentTrigger.current)?.mentionClassname || "",
           trigger: currentTrigger.current || "",
           value: matches.current[0].value,
           editorEl: editorRef.current,
           label: matches.current[0].label,
-          highlightEl: highlightEl.current
+          highlightEl
         });
-      } else if (isMatching.current && matches.current.length !== 1) {
-        removeHighlight(editorRef.current, highlightEl.current);
+      } else if (isMatching.current && matches.current.length !== 1 && highlightEl) {
+        removeHighlight(editorRef.current, highlightEl);
         autoPositionCaret(editorRef.current);
       }
       isMatching.current = false;
       setShowSuggestions(false);
     } else if (isMatching.current && key !== currentTrigger.current) {
-      const inputStr = highlightEl.current?.innerText || "";
+      const inputStr = highlightEl?.innerText || "";
       const symbolIndex = inputStr.lastIndexOf(currentTrigger.current || "");
       const searchStr = inputStr.substr(symbolIndex + 1).replace(/[^\w]/, "");
       const regex = new RegExp(searchStr, "i");
@@ -279,8 +280,8 @@ var ReactMentionable = forwardRef((props, ref) => {
           setSuggestions(matches.current);
         });
       }
-    } else if (key === "Backspace") {
-      e.preventDefault();
+    }
+    if (key === "Backspace") {
       const selection = window.getSelection();
       const anchorNode = selection?.anchorNode;
       if (!anchorNode)
@@ -292,8 +293,7 @@ var ReactMentionable = forwardRef((props, ref) => {
       }
       removeTrailingBreaks(anchorNode);
       removeTrailingBreaks(editorRef.current);
-      if (highlightEl.current?.innerText.length === 1) {
-        e.preventDefault();
+      if (!highlightEl) {
         setShowSuggestions(false);
         isMatching.current = false;
       }
@@ -323,13 +323,13 @@ var ReactMentionable = forwardRef((props, ref) => {
       }
       currentTrigger.current = key;
       isMatching.current = true;
-      highlightEl.current = document.createElement("span");
-      highlightEl.current.className = `${mentions.find((m) => m.trigger === currentTrigger.current)?.highlightClassName}`;
-      highlightEl.current.innerText = currentTrigger.current;
-      highlightEl.current.setAttribute("contentEditable", "true");
-      insertAtCaretPos(editorRef.current, highlightEl.current);
+      const highlightSpan = document.createElement("span");
+      highlightSpan.className = `${mentions.find((m) => m.trigger === currentTrigger.current)?.highlightClassName}`;
+      highlightSpan.innerText = currentTrigger.current;
+      highlightSpan.setAttribute("contentEditable", "true");
+      insertAtCaretPos(editorRef.current, highlightSpan);
       setShowSuggestions(true);
-      autoPositionCaret(highlightEl.current);
+      autoPositionCaret(highlightSpan);
       e.preventDefault();
     }
   };
