@@ -231,8 +231,8 @@ var ReactMentionable = (0, import_react.forwardRef)((props, ref) => {
   const {
     placeHolder,
     defaultValue,
-    inputClass,
-    suggestionsClass,
+    inputClassName,
+    suggestionsClassName,
     mentions,
     onChange,
     renderSuggestion,
@@ -250,7 +250,7 @@ var ReactMentionable = (0, import_react.forwardRef)((props, ref) => {
     if (!editorRef.current || !highlightEl)
       return;
     insertMention({
-      mentionClassname: mentions.find((m) => m.trigger === currentTrigger.current)?.mentionClassname || "",
+      mentionClassName: mentions.find((m) => m.trigger === currentTrigger.current)?.mentionClassName || "",
       trigger: currentTrigger.current || "",
       value: suggestion.value,
       editorEl: editorRef.current,
@@ -314,7 +314,7 @@ var ReactMentionable = (0, import_react.forwardRef)((props, ref) => {
         }
       } else {
         mention?.suggestions(searchStr).then((suggested) => {
-          matches.current = suggested.filter((suggestion) => regex.test(suggestion.label));
+          matches.current = suggested;
           setSuggestions(matches.current);
         });
       }
@@ -414,7 +414,7 @@ var ReactMentionable = (0, import_react.forwardRef)((props, ref) => {
         "div",
         {
           placeholder: placeHolder,
-          className: `react-mentionable-input ${inputClass}`,
+          className: `react-mentionable-input ${inputClassName}`,
           style: {
             padding: "0.5rem"
           },
@@ -433,7 +433,7 @@ var ReactMentionable = (0, import_react.forwardRef)((props, ref) => {
     /* @__PURE__ */ import_react.default.createElement(
       "div",
       {
-        className: suggestionsClass,
+        className: suggestionsClassName,
         style: {
           opacity: `${showSuggestions ? "1" : "0"}`,
           position: "absolute",
