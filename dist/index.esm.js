@@ -392,12 +392,11 @@ var ReactMentionable = forwardRef((props, ref) => {
         }
       )
     ),
-    /* @__PURE__ */ React.createElement(
+    showSuggestions && /* @__PURE__ */ React.createElement(
       "div",
       {
         className: suggestionsClassName,
         style: {
-          opacity: `${showSuggestions ? "1" : "0"}`,
           position: "absolute",
           width: "100%"
         }

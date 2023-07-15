@@ -430,12 +430,11 @@ var ReactMentionable = (0, import_react.forwardRef)((props, ref) => {
         }
       )
     ),
-    /* @__PURE__ */ import_react.default.createElement(
+    showSuggestions && /* @__PURE__ */ import_react.default.createElement(
       "div",
       {
         className: suggestionsClassName,
         style: {
-          opacity: `${showSuggestions ? "1" : "0"}`,
           position: "absolute",
           width: "100%"
         }
