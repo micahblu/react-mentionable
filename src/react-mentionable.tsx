@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useLayoutEffect, forwardRef } from 'react'
+import React, { useRef, useState, useEffect, useLayoutEffect, forwardRef, MutableRefObject } from 'react'
 import * as utils from './utils'
 
 export type Suggestion = {
@@ -27,7 +27,11 @@ type ReactMenttionableProps = {
 
 export const MENTION_HIGHLIGHT_CLASSNAME = 'react-mentionable-highlight'
 
-const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((props: ReactMenttionableProps, ref: React.Ref<HTMLDivElement | null>) => {
+const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>(
+  (
+    props: ReactMenttionableProps,
+    ref: MutableRefObject<HTMLDivElement | null>
+  ) => {
   const {
     placeHolder,
     defaultValue,
@@ -252,7 +256,7 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
             if (typeof ref === 'function') {
               ref(node)
             } else if (ref) {
-              ref.current
+              ref.current = node
             }
           }} 
           contentEditable

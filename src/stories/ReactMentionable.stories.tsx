@@ -36,7 +36,7 @@ const Demo = () => {
       avatar: '/images/tom-brady.jpg'
     }]
   console.log('toLinks', toLinks)
-  const editorRef = useRef<HTMLDivElement | null>(null)
+  const editorRef = useRef() as React.MutableRefObject<HTMLDivElement>
   const apiCall = debounce((resolve: Function) => {
     window.setTimeout(() => {
       resolve(suggestions) 
@@ -77,6 +77,13 @@ const Demo = () => {
           </div>
         )}
       />
+      <button onClick={() => {
+        if (editorRef.current) {
+          editorRef.current.innerHTML = ''
+        }
+      }}>
+        Clear
+      </button>
       <br />
       <div style={{width: '100%', height: '500px', background: 'green' }} />
       <br />
