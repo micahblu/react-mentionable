@@ -5,18 +5,18 @@ export const getLastKeyStroke = (el: HTMLDivElement | null): string | undefined 
   const caretPos = getCaretPosition(el)
   return el.innerText.at(caretPos - 1)
 }
-
+'react-mentionable-highlight'
 export const insertMention = ({
-  mentionClassname,
+  mentionClassName,
   editorEl,
   highlightEl,
   value,
   label,
   trigger
-}: { mentionClassname: string, editorEl: HTMLDivElement, highlightEl: HTMLElement, value: string, label: string, trigger: string }) => {
+}: { mentionClassName: string, editorEl: HTMLDivElement, highlightEl: HTMLSpanElement, value: string, label: string, trigger: string }) => {
 	const mentionEl = document.createElement('span')
 		
-  mentionEl.className = mentionClassname
+  mentionEl.className = mentionClassName,
   mentionEl.setAttribute('trigger', trigger)
   mentionEl.setAttribute('value', value)
   mentionEl.contentEditable = 'false'
@@ -196,7 +196,7 @@ export const convertToMentions = (str: string, mentions: Array<Mention>) => {
     const label = p2
     const value = p3
 
-    const classname = mentions.find(m => m.trigger === trigger)?.mentionClassname
+    const classname = mentions.find(m => m.trigger === trigger)?.mentionClassName
     return `<span class="${classname}" trigger="${trigger}" value="${value}" contenteditable="false">${label}</span>`
   })
 }

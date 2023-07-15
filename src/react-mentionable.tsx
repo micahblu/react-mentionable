@@ -25,6 +25,8 @@ type ReactMenttionableProps = {
   disabled?: boolean
 }
 
+export const MENTION_HIGHLIGHT_CLASSNAME = 'react-mentionable-highlight'
+
 const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((props: ReactMenttionableProps, ref: React.Ref<HTMLDivElement | null>) => {
   const {
     placeHolder,
@@ -46,7 +48,7 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
   let matches =  useRef<Array<Suggestion>>([])
 
   const selectSuggestion = (suggestion: Suggestion) => {
-    const highlightEl = document.getElementsByClassName('highlight')[0] as HTMLSpanElement 
+    const highlightEl = document.getElementsByClassName(MENTION_HIGHLIGHT_CLASSNAME)[0] as HTMLSpanElement 
     if (!editorRef.current || !highlightEl) return
     utils.insertMention({
       mentionClassName: mentions.find(m => m.trigger === currentTrigger.current)?.mentionClassName || '',
@@ -54,7 +56,7 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
       value: suggestion.value,
       editorEl: editorRef.current,
       label: suggestion.label, 
-      highlightEl: highlightEl 
+      highlightEl: highlightEl
     })
     setShowSuggestions(false)
     isMatching.current = false
@@ -79,7 +81,7 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
 
   const keyUpListener = (e: KeyboardEvent) => {
     if (!editorRef.current) return
-    const highlightEl = document.getElementsByClassName('highlight')[0] as HTMLSpanElement 
+    const highlightEl = document.getElementsByClassName(MENTION_HIGHLIGHT_CLASSNAME)[0] as HTMLSpanElement 
     
     utils.removeFontTags(editorRef.current)
     const key = e.key || utils.getLastKeyStroke(editorRef.current)
@@ -95,7 +97,7 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
         || matches.current.map(m => m.label).includes(nodeText)
       ) {
         utils.insertMention({
-          mentionClassname: mentions.find(m => m.trigger === currentTrigger.current)?.mentionClassname || '',
+          mentionClassName: mentions.find(m => m.trigger === currentTrigger.current)?.mentionClassName || '',
           trigger: currentTrigger.current || '',
           value: matches.current[0].value,
           editorEl: editorRef.current,
@@ -186,7 +188,7 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
       currentTrigger.current = key
       isMatching.current = true
       const highlightSpan = document.createElement('span')
-      highlightSpan.className = `${mentions.find(m => m.trigger === currentTrigger.current)?.highlightClassName}`
+      highlightSpan.className = `${MENTION_HIGHLIGHT_CLASSNAME} ${mentions.find(m => m.trigger === currentTrigger.current)?.highlightClassName}`
       highlightSpan.innerText = currentTrigger.current 
       highlightSpan.setAttribute('contentEditable', 'true')
 
