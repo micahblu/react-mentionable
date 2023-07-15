@@ -9,7 +9,7 @@ var getLastKeyStroke = (el) => {
   return el.innerText.at(caretPos - 1);
 };
 var insertMention = ({
-  mentionClassname,
+  mentionClassName,
   editorEl,
   highlightEl,
   value,
@@ -17,8 +17,7 @@ var insertMention = ({
   trigger
 }) => {
   const mentionEl = document.createElement("span");
-  mentionEl.className = mentionClassname;
-  mentionEl.setAttribute("trigger", trigger);
+  mentionEl.className = mentionClassName, mentionEl.setAttribute("trigger", trigger);
   mentionEl.setAttribute("value", value);
   mentionEl.contentEditable = "false";
   mentionEl.innerText = label;
@@ -151,7 +150,7 @@ var convertToMentions = (str, mentions) => {
     const trigger = p1;
     const label = p2;
     const value = p3;
-    const classname = mentions.find((m) => m.trigger === trigger)?.mentionClassname;
+    const classname = mentions.find((m) => m.trigger === trigger)?.mentionClassName;
     return `<span class="${classname}" trigger="${trigger}" value="${value}" contenteditable="false">${label}</span>`;
   });
 };
@@ -189,6 +188,7 @@ var convertToMarkup = (html) => {
 };
 
 // src/react-mentionable.tsx
+var MENTION_HIGHLIGHT_CLASSNAME = "react-mentionable-highlight";
 var ReactMentionable = forwardRef((props, ref) => {
   const {
     placeHolder,
@@ -208,7 +208,7 @@ var ReactMentionable = forwardRef((props, ref) => {
   let currentTrigger = useRef();
   let matches = useRef([]);
   const selectSuggestion = (suggestion) => {
-    const highlightEl = document.getElementsByClassName("highlight")[0];
+    const highlightEl = document.getElementsByClassName(MENTION_HIGHLIGHT_CLASSNAME)[0];
     if (!editorRef.current || !highlightEl)
       return;
     insertMention({
@@ -239,7 +239,7 @@ var ReactMentionable = forwardRef((props, ref) => {
   const keyUpListener = (e) => {
     if (!editorRef.current)
       return;
-    const highlightEl = document.getElementsByClassName("highlight")[0];
+    const highlightEl = document.getElementsByClassName(MENTION_HIGHLIGHT_CLASSNAME)[0];
     removeFontTags(editorRef.current);
     const key = e.key || getLastKeyStroke(editorRef.current);
     if (isMatching.current && key === "Tab" || key === " ") {
@@ -249,7 +249,7 @@ var ReactMentionable = forwardRef((props, ref) => {
       const nodeText = lastNode?.nodeValue?.replace(currentTrigger.current || "", "").toLowerCase() || "";
       if (highlightEl && (matches.current.length === 1 && isMatching.current) || matches.current.map((m) => m.label).includes(nodeText)) {
         insertMention({
-          mentionClassname: mentions.find((m) => m.trigger === currentTrigger.current)?.mentionClassname || "",
+          mentionClassName: mentions.find((m) => m.trigger === currentTrigger.current)?.mentionClassName || "",
           trigger: currentTrigger.current || "",
           value: matches.current[0].value,
           editorEl: editorRef.current,
@@ -324,7 +324,7 @@ var ReactMentionable = forwardRef((props, ref) => {
       currentTrigger.current = key;
       isMatching.current = true;
       const highlightSpan = document.createElement("span");
-      highlightSpan.className = `${mentions.find((m) => m.trigger === currentTrigger.current)?.highlightClassName}`;
+      highlightSpan.className = `${MENTION_HIGHLIGHT_CLASSNAME} ${mentions.find((m) => m.trigger === currentTrigger.current)?.highlightClassName}`;
       highlightSpan.innerText = currentTrigger.current;
       highlightSpan.setAttribute("contentEditable", "true");
       insertAtCaretPos(editorRef.current, highlightSpan);

@@ -13,13 +13,13 @@ declare module 'react-mentionable/react-mentionable' {
   export type Mention = {
       trigger: string;
       highlightClassName?: string;
-      mentionClassname?: string;
+      mentionClassName?: string;
       suggestions: Array<Suggestion> | ((searchStr: string) => Promise<Array<Suggestion>>);
   };
   type ReactMenttionableProps = {
       placeHolder?: string;
-      inputClass?: string;
-      suggestionsClass?: string;
+      inputClassName?: string;
+      suggestionsClassName?: string;
       defaultValue?: string;
       onChange: (props: {
           text: string;
@@ -29,6 +29,7 @@ declare module 'react-mentionable/react-mentionable' {
       renderSuggestion?: (suggestion: Suggestion, selectSuggestion: (suggestion: Suggestion) => void) => React.ReactElement;
       disabled?: boolean;
   };
+  export const MENTION_HIGHLIGHT_CLASSNAME = "react-mentionable-highlight";
   const ReactMentionable: React.ForwardRefExoticComponent<ReactMenttionableProps & React.RefAttributes<HTMLDivElement>>;
   export default ReactMentionable;
 
@@ -47,10 +48,10 @@ declare module 'react-mentionable/stories/ReactMentionable.stories' {
 declare module 'react-mentionable/utils' {
   import type { Mention } from "react-mentionable/react-mentionable";
   export const getLastKeyStroke: (el: HTMLDivElement | null) => string | undefined;
-  export const insertMention: ({ mentionClassname, editorEl, highlightEl, value, label, trigger }: {
-      mentionClassname: string;
+  export const insertMention: ({ mentionClassName, editorEl, highlightEl, value, label, trigger }: {
+      mentionClassName: string;
       editorEl: HTMLDivElement;
-      highlightEl: HTMLElement;
+      highlightEl: HTMLSpanElement;
       value: string;
       label: string;
       trigger: string;
