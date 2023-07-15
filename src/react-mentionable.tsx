@@ -258,27 +258,30 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
           contentEditable
         />
 			</div>
-			<div
-        className={suggestionsClassName}
-        style={{
-          opacity: `${showSuggestions ? '1' : '0'}`,
-          position: 'absolute',
-          width: '100%'
-        }}
-      >
-        {suggestions && suggestions.map((suggestion) => {
-          if (renderSuggestion) return renderSuggestion(suggestion, selectSuggestion)
-          return (
-            <div
-              onClick={() => selectSuggestion(suggestion)}
-              key={suggestion.label}
-              className='react-mentionable-suggestion'
-            >
-              { suggestion.label }
-            </div>
-          )
-        })}
-      </div>
+      {
+        showSuggestions &&
+        <div
+          className={suggestionsClassName}
+          style={{
+            position: 'absolute',
+            width: '100%'
+          }}
+        >
+          {suggestions && suggestions.map((suggestion) => {
+            if (renderSuggestion) return renderSuggestion(suggestion, selectSuggestion)
+            return (
+              <div
+                onClick={() => selectSuggestion(suggestion)}
+                key={suggestion.label}
+                className='react-mentionable-suggestion'
+              >
+                { suggestion.label }
+              </div>
+            )
+          })}
+        </div>
+      }
+			
 		</div>
   )
 }) 
