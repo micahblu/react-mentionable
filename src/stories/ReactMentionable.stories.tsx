@@ -53,16 +53,16 @@ const Demo = () => {
       <ReactMentionable
         ref={editorRef}
         placeHolder='What is on your mind?'
-        inputClass='inputClass'
+        inputClassName='inputClass'
         defaultValue={''}
-        suggestionsClass='suggestions'
+        suggestionsClassName='suggestions'
         onChange={({ text, markup }) => {
           // console.log('onChange', markup)
         }}
         mentions={[{
           trigger: '@',
           highlightClassName: 'highlight',
-          mentionClassname: 'mention',
+          mentionClassName: 'mention',
           // suggestions: (searchStr: string) => fetchSuggestions(searchStr) 
           suggestions
         }]}

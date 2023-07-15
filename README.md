@@ -65,7 +65,8 @@ const mentions = [{
   }}
   defaultValue={''}
   placeHolder='Write away'
-  inputClass='editor-class'
+  inputClassName='editor-class'
+  suggestionsClassName='suggestions'
   mentions={mentions}
 />
 <button

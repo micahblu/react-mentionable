@@ -10,14 +10,14 @@ export type Suggestion = {
 export type Mention = {
   trigger: string 
   highlightClassName?: string
-  mentionClassname?: string
+  mentionClassName?: string
   suggestions: Array<Suggestion> | ((searchStr: string) => Promise<Array<Suggestion>>)
 }
 
 type ReactMenttionableProps = {
   placeHolder?: string
-  inputClass?: string
-  suggestionsClass?: string
+  inputClassName?: string
+  suggestionsClassName?: string
   defaultValue?: string
   onChange:  (props: { text: string, markup: string }) => void
   mentions: Array<Mention>
@@ -29,8 +29,8 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
   const {
     placeHolder,
     defaultValue,
-    inputClass,
-    suggestionsClass,
+    inputClassName,
+    suggestionsClassName,
     mentions,
     onChange,
     renderSuggestion,
@@ -49,7 +49,7 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
     const highlightEl = document.getElementsByClassName('highlight')[0] as HTMLSpanElement 
     if (!editorRef.current || !highlightEl) return
     utils.insertMention({
-      mentionClassname: mentions.find(m => m.trigger === currentTrigger.current)?.mentionClassname || '',
+      mentionClassName: mentions.find(m => m.trigger === currentTrigger.current)?.mentionClassName || '',
       trigger: currentTrigger.current || '',
       value: suggestion.value,
       editorEl: editorRef.current,
@@ -126,7 +126,8 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
         }
       } else {
         mention?.suggestions(searchStr).then((suggested: Array<Suggestion>) => {
-          matches.current = suggested.filter((suggestion) => regex.test(suggestion.label))
+          // matches.current = suggested.filter((suggestion) => regex.test(suggestion.label))
+          matches.current = suggested
           setSuggestions(matches.current)
         })
       }
@@ -240,7 +241,7 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
       >
 			  <div
           placeholder={placeHolder}
-          className={`react-mentionable-input ${inputClass}`}
+          className={`react-mentionable-input ${inputClassName}`}
           style={{
             padding: '0.5rem'
           }}
@@ -256,7 +257,7 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>((pro
         />
 			</div>
 			<div
-        className={suggestionsClass}
+        className={suggestionsClassName}
         style={{
           opacity: `${showSuggestions ? '1' : '0'}`,
           position: 'absolute',
