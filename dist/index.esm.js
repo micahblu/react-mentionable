@@ -189,185 +189,178 @@ var convertToMarkup = (html) => {
 
 // src/react-mentionable.tsx
 var MENTION_HIGHLIGHT_CLASSNAME = "react-mentionable-highlight";
-var ReactMentionable = forwardRef((props, ref) => {
-  const {
-    placeHolder,
-    defaultValue,
-    inputClassName,
-    suggestionsClassName,
-    mentions,
-    onChange,
-    renderSuggestion,
-    disabled
-  } = props;
-  const editorRef = useRef();
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [suggestions, setSuggestions] = useState([]);
-  const triggers = mentions.map((mention) => mention.trigger);
-  let isMatching = useRef(false);
-  let currentTrigger = useRef();
-  let matches = useRef([]);
-  const selectSuggestion = (suggestion) => {
-    const highlightEl = document.getElementsByClassName(MENTION_HIGHLIGHT_CLASSNAME)[0];
-    if (!editorRef.current || !highlightEl)
-      return;
-    insertMention({
-      mentionClassName: mentions.find((m) => m.trigger === currentTrigger.current)?.mentionClassName || "",
-      trigger: currentTrigger.current || "",
-      value: suggestion.value,
-      editorEl: editorRef.current,
-      label: suggestion.label,
-      highlightEl
-    });
-    setShowSuggestions(false);
-    isMatching.current = false;
-  };
-  const onPasteListener = (e) => {
-    e.preventDefault();
-    const paste = e.clipboardData?.getData("text") || "";
-    const selection = window.getSelection();
-    if (!selection?.rangeCount)
-      return;
-    selection.deleteFromDocument();
-    selection.getRangeAt(0).insertNode(document.createTextNode(paste));
-    selection.collapseToEnd();
-    onChange({
-      text: editorRef.current?.innerText || paste,
-      markup: convertToMarkup(editorRef.current?.innerHTML || paste)
-    });
-  };
-  const keyUpListener = (e) => {
-    if (!editorRef.current)
-      return;
-    const highlightEl = document.getElementsByClassName(MENTION_HIGHLIGHT_CLASSNAME)[0];
-    removeFontTags(editorRef.current);
-    const key = e.key || getLastKeyStroke(editorRef.current);
-    if (isMatching.current && key === "Tab" || key === " ") {
-      const lastNode = getLastNode(editorRef.current);
-      if (!lastNode)
+var ReactMentionable = forwardRef(
+  (props, ref) => {
+    const {
+      placeHolder,
+      defaultValue,
+      inputClassName,
+      suggestionsClassName,
+      mentions,
+      onChange,
+      renderSuggestion,
+      disabled
+    } = props;
+    const editorRef = useRef();
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [suggestions, setSuggestions] = useState([]);
+    const triggers = mentions.map((mention) => mention.trigger);
+    let isMatching = useRef(false);
+    let currentTrigger = useRef();
+    let matches = useRef([]);
+    const selectSuggestion = (suggestion) => {
+      const highlightEl = document.getElementsByClassName(MENTION_HIGHLIGHT_CLASSNAME)[0];
+      if (!editorRef.current || !highlightEl)
         return;
-      const nodeText = lastNode?.nodeValue?.replace(currentTrigger.current || "", "").toLowerCase() || "";
-      if (highlightEl && (matches.current.length === 1 && isMatching.current) || matches.current.map((m) => m.label).includes(nodeText)) {
-        insertMention({
-          mentionClassName: mentions.find((m) => m.trigger === currentTrigger.current)?.mentionClassName || "",
-          trigger: currentTrigger.current || "",
-          value: matches.current[0].value,
-          editorEl: editorRef.current,
-          label: matches.current[0].label,
-          highlightEl
-        });
-      } else if (isMatching.current && matches.current.length !== 1 && highlightEl) {
-        removeHighlight(editorRef.current, highlightEl);
-        autoPositionCaret(editorRef.current);
-      }
-      isMatching.current = false;
+      insertMention({
+        mentionClassName: mentions.find((m) => m.trigger === currentTrigger.current)?.mentionClassName || "",
+        trigger: currentTrigger.current || "",
+        value: suggestion.value,
+        editorEl: editorRef.current,
+        label: suggestion.label,
+        highlightEl
+      });
       setShowSuggestions(false);
-    } else if (isMatching.current && key !== currentTrigger.current) {
-      const inputStr = highlightEl?.innerText || "";
-      const symbolIndex = inputStr.lastIndexOf(currentTrigger.current || "");
-      const searchStr = inputStr.substr(symbolIndex + 1).replace(/[^\w]/, "");
-      const regex = new RegExp(searchStr, "i");
-      const mention = mentions.find((m) => m.trigger === currentTrigger.current);
-      const suggestions2 = mentions.find((m) => m.trigger === currentTrigger.current)?.suggestions;
-      if (Array.isArray(mention?.suggestions)) {
-        if (suggestions2) {
-          matches.current = suggestions2.filter((suggestion) => regex.test(suggestion.label));
-          setSuggestions(matches.current);
-        }
-      } else {
-        mention?.suggestions(searchStr).then((suggested) => {
-          matches.current = suggested;
-          setSuggestions(matches.current);
-        });
-      }
-    }
-    if (key === "Backspace") {
-      const selection = window.getSelection();
-      const anchorNode = selection?.anchorNode;
-      if (!anchorNode)
-        return;
-      const last = anchorNode.childNodes.length || 0;
-      const lastAnchorChild = anchorNode.childNodes[last - 1];
-      if (lastAnchorChild?.nodeValue === "") {
-        lastAnchorChild?.parentNode?.removeChild(lastAnchorChild);
-      }
-      removeTrailingBreaks(anchorNode);
-      removeTrailingBreaks(editorRef.current);
-      if (!highlightEl) {
-        setShowSuggestions(false);
-        isMatching.current = false;
-      }
-    }
-    onChange({
-      text: editorRef.current.innerText,
-      markup: convertToMarkup(editorRef.current.innerHTML)
-    });
-  };
-  const keyDownListener = (e) => {
-    const key = e.key || getLastKeyStroke(editorRef.current);
-    if (!key || !editorRef.current || typeof document === "undefined")
-      return;
-    if (key === "Enter") {
-      e.preventDefault();
-      const br = document.createElement("br");
-      const textNode = document.createTextNode("\u200B");
-      insertAtCaretPos(editorRef.current, br);
-      insertAfter(textNode, br);
-      autoPositionCaret(editorRef.current);
-    } else if (key === "Tab")
-      e.preventDefault();
-    else if (triggers.includes(key)) {
-      if (isMatching.current) {
-        e.preventDefault();
-        return;
-      }
-      currentTrigger.current = key;
-      isMatching.current = true;
-      const highlightSpan = document.createElement("span");
-      highlightSpan.className = `${MENTION_HIGHLIGHT_CLASSNAME} ${mentions.find((m) => m.trigger === currentTrigger.current)?.highlightClassName}`;
-      highlightSpan.innerText = currentTrigger.current;
-      highlightSpan.setAttribute("contentEditable", "true");
-      insertAtCaretPos(editorRef.current, highlightSpan);
-      setShowSuggestions(true);
-      autoPositionCaret(highlightSpan);
-      e.preventDefault();
-    }
-  };
-  useEffect(() => {
-    if (defaultValue && editorRef.current) {
-      editorRef.current.innerHTML = convertToMentions(defaultValue, mentions);
-    }
-  }, [defaultValue]);
-  useEffect(() => {
-    if (disabled && editorRef.current) {
-      editorRef.current.setAttribute("contenteditable", "false");
-      editorRef.current.style.opacity = "0.5";
-    }
-  }, [disabled]);
-  useLayoutEffect(() => {
-    if (!editorRef?.current || typeof document === "undefined")
-      return;
-    editorRef.current.addEventListener("keydown", keyDownListener);
-    editorRef.current.addEventListener("keyup", keyUpListener);
-    editorRef.current.addEventListener("paste", onPasteListener);
-    return () => {
-      editorRef.current?.removeEventListener("keydown", keyDownListener);
-      editorRef.current?.removeEventListener("keyup", keyUpListener);
-      editorRef.current?.removeEventListener("paste", onPasteListener);
+      isMatching.current = false;
     };
-  }, []);
-  return /* @__PURE__ */ React.createElement(
-    "div",
-    {
-      className: "react-mentionable",
-      style: {
-        position: "relative"
+    const onPasteListener = (e) => {
+      e.preventDefault();
+      const paste = e.clipboardData?.getData("text") || "";
+      const selection = window.getSelection();
+      if (!selection?.rangeCount)
+        return;
+      selection.deleteFromDocument();
+      selection.getRangeAt(0).insertNode(document.createTextNode(paste));
+      selection.collapseToEnd();
+      onChange({
+        text: editorRef.current?.innerText || paste,
+        markup: convertToMarkup(editorRef.current?.innerHTML || paste)
+      });
+    };
+    const keyUpListener = (e) => {
+      if (!editorRef.current)
+        return;
+      const highlightEl = document.getElementsByClassName(MENTION_HIGHLIGHT_CLASSNAME)[0];
+      removeFontTags(editorRef.current);
+      const key = e.key || getLastKeyStroke(editorRef.current);
+      if (isMatching.current && key === "Tab" || key === " ") {
+        const lastNode = getLastNode(editorRef.current);
+        if (!lastNode)
+          return;
+        const nodeText = lastNode?.nodeValue?.replace(currentTrigger.current || "", "").toLowerCase() || "";
+        if (highlightEl && (matches.current.length === 1 && isMatching.current) || matches.current.map((m) => m.label).includes(nodeText)) {
+          insertMention({
+            mentionClassName: mentions.find((m) => m.trigger === currentTrigger.current)?.mentionClassName || "",
+            trigger: currentTrigger.current || "",
+            value: matches.current[0].value,
+            editorEl: editorRef.current,
+            label: matches.current[0].label,
+            highlightEl
+          });
+        } else if (isMatching.current && matches.current.length !== 1 && highlightEl) {
+          removeHighlight(editorRef.current, highlightEl);
+          autoPositionCaret(editorRef.current);
+        }
+        isMatching.current = false;
+        setShowSuggestions(false);
+      } else if (isMatching.current && key !== currentTrigger.current) {
+        const inputStr = highlightEl?.innerText || "";
+        const symbolIndex = inputStr.lastIndexOf(currentTrigger.current || "");
+        const searchStr = inputStr.substr(symbolIndex + 1).replace(/[^\w]/, "");
+        const regex = new RegExp(searchStr, "i");
+        const mention = mentions.find((m) => m.trigger === currentTrigger.current);
+        const suggestions2 = mentions.find((m) => m.trigger === currentTrigger.current)?.suggestions;
+        if (Array.isArray(mention?.suggestions)) {
+          if (suggestions2) {
+            matches.current = suggestions2.filter((suggestion) => regex.test(suggestion.label));
+            setSuggestions(matches.current);
+          }
+        } else {
+          mention?.suggestions(searchStr).then((suggested) => {
+            matches.current = suggested;
+            setSuggestions(matches.current);
+          });
+        }
       }
-    },
-    /* @__PURE__ */ React.createElement(
+      if (key === "Backspace") {
+        const selection = window.getSelection();
+        const anchorNode = selection?.anchorNode;
+        if (!anchorNode)
+          return;
+        const last = anchorNode.childNodes.length || 0;
+        const lastAnchorChild = anchorNode.childNodes[last - 1];
+        if (lastAnchorChild?.nodeValue === "") {
+          lastAnchorChild?.parentNode?.removeChild(lastAnchorChild);
+        }
+        removeTrailingBreaks(anchorNode);
+        removeTrailingBreaks(editorRef.current);
+        if (!highlightEl) {
+          setShowSuggestions(false);
+          isMatching.current = false;
+        }
+      }
+      onChange({
+        text: editorRef.current.innerText,
+        markup: convertToMarkup(editorRef.current.innerHTML)
+      });
+    };
+    const keyDownListener = (e) => {
+      const key = e.key || getLastKeyStroke(editorRef.current);
+      if (!key || !editorRef.current || typeof document === "undefined")
+        return;
+      if (key === "Enter") {
+        e.preventDefault();
+        const br = document.createElement("br");
+        const textNode = document.createTextNode("\u200B");
+        insertAtCaretPos(editorRef.current, br);
+        insertAfter(textNode, br);
+        autoPositionCaret(editorRef.current);
+      } else if (key === "Tab")
+        e.preventDefault();
+      else if (triggers.includes(key)) {
+        if (isMatching.current) {
+          e.preventDefault();
+          return;
+        }
+        currentTrigger.current = key;
+        isMatching.current = true;
+        const highlightSpan = document.createElement("span");
+        highlightSpan.className = `${MENTION_HIGHLIGHT_CLASSNAME} ${mentions.find((m) => m.trigger === currentTrigger.current)?.highlightClassName}`;
+        highlightSpan.innerText = currentTrigger.current;
+        highlightSpan.setAttribute("contentEditable", "true");
+        insertAtCaretPos(editorRef.current, highlightSpan);
+        setShowSuggestions(true);
+        autoPositionCaret(highlightSpan);
+        e.preventDefault();
+      }
+    };
+    useEffect(() => {
+      if (defaultValue && editorRef.current) {
+        editorRef.current.innerHTML = convertToMentions(defaultValue, mentions);
+      }
+    }, [defaultValue]);
+    useEffect(() => {
+      if (disabled && editorRef.current) {
+        editorRef.current.setAttribute("contenteditable", "false");
+        editorRef.current.style.opacity = "0.5";
+      }
+    }, [disabled]);
+    useLayoutEffect(() => {
+      if (!editorRef?.current || typeof document === "undefined")
+        return;
+      editorRef.current.addEventListener("keydown", keyDownListener);
+      editorRef.current.addEventListener("keyup", keyUpListener);
+      editorRef.current.addEventListener("paste", onPasteListener);
+      return () => {
+        editorRef.current?.removeEventListener("keydown", keyDownListener);
+        editorRef.current?.removeEventListener("keyup", keyUpListener);
+        editorRef.current?.removeEventListener("paste", onPasteListener);
+      };
+    }, []);
+    return /* @__PURE__ */ React.createElement(
       "div",
       {
-        className: "react-mentionable-editor-container",
+        className: "react-mentionable",
         style: {
           position: "relative"
         }
@@ -375,48 +368,57 @@ var ReactMentionable = forwardRef((props, ref) => {
       /* @__PURE__ */ React.createElement(
         "div",
         {
-          placeholder: placeHolder,
-          className: `react-mentionable-input ${inputClassName}`,
+          className: "react-mentionable-editor-container",
           style: {
-            padding: "0.5rem"
-          },
-          ref: (node) => {
-            editorRef.current = node;
-            if (typeof ref === "function") {
-              ref(node);
-            } else if (ref) {
-              ref.current;
-            }
-          },
-          contentEditable: true
-        }
-      )
-    ),
-    showSuggestions && /* @__PURE__ */ React.createElement(
-      "div",
-      {
-        className: suggestionsClassName,
-        style: {
-          position: "absolute",
-          width: "100%"
-        }
-      },
-      suggestions && suggestions.map((suggestion) => {
-        if (renderSuggestion)
-          return renderSuggestion(suggestion, selectSuggestion);
-        return /* @__PURE__ */ React.createElement(
+            position: "relative"
+          }
+        },
+        /* @__PURE__ */ React.createElement(
           "div",
           {
-            onClick: () => selectSuggestion(suggestion),
-            key: suggestion.label,
-            className: "react-mentionable-suggestion"
-          },
-          suggestion.label
-        );
-      })
-    )
-  );
-});
+            placeholder: placeHolder,
+            className: `react-mentionable-input ${inputClassName}`,
+            style: {
+              padding: "0.5rem"
+            },
+            ref: (node) => {
+              editorRef.current = node;
+              if (typeof ref === "function") {
+                ref(node);
+              } else if (ref) {
+                ref.current = node;
+              }
+            },
+            contentEditable: true
+          }
+        )
+      ),
+      showSuggestions && /* @__PURE__ */ React.createElement(
+        "div",
+        {
+          className: suggestionsClassName,
+          style: {
+            position: "absolute",
+            width: "100%"
+          }
+        },
+        suggestions && suggestions.map((suggestion) => {
+          if (renderSuggestion)
+            return renderSuggestion(suggestion, selectSuggestion);
+          return /* @__PURE__ */ React.createElement(
+            "div",
+            {
+              onClick: () => selectSuggestion(suggestion),
+              key: suggestion.label,
+              className: "react-mentionable-suggestion"
+            },
+            suggestion.label
+          );
+        })
+      )
+    );
+  }
+);
 var react_mentionable_default = ReactMentionable;
 export {
   convertFormattedMentions,
