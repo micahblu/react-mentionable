@@ -296,7 +296,6 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>(
           })}
         </div>
       }
-			
 		</div>
   )
 }) 

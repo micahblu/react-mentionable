@@ -31,8 +31,6 @@ export const insertMention = ({
     mentionValue = mentionValue.substr(1)
   }
 
-  console.log('mentionLabel', mentionLabel)
-
   mentionEl.className = mentionClassName,
   mentionEl.setAttribute('trigger', trigger)
   mentionEl.setAttribute('value', mentionValue)
