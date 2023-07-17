@@ -35,7 +35,7 @@ const Demo = () => {
       handle: '@tombrady',
       avatar: '/images/tom-brady.jpg'
     }]
-  console.log('toLinks', toLinks)
+  // console.log('toLinks', toLinks)
   const editorRef = useRef() as React.MutableRefObject<HTMLDivElement>
   const apiCall = debounce((resolve: Function) => {
     window.setTimeout(() => {
@@ -48,6 +48,16 @@ const Demo = () => {
     })
   }
 
+  const renderSuggestion = (suggestion: Suggestion, selectSuggestion: Function) => (
+    <div
+      onClick={() => selectSuggestion(suggestion)}
+      key={suggestion.label}
+      className='react-mentionable-suggestion'
+      style={{ borderBottom: '1px solid #ccc', padding: '1rem', cursor: 'pointer' }}
+    >
+      { suggestion.label }
+    </div>
+  )
   return (
     <>
       <ReactMentionable
@@ -63,19 +73,27 @@ const Demo = () => {
           trigger: '@',
           highlightClassName: 'highlight',
           mentionClassName: 'mention',
-          // suggestions: (searchStr: string) => fetchSuggestions(searchStr) 
+          requireMatch: true,
+          keepTrigger: false,
           suggestions
+        }, {
+          trigger: '#',
+          highlightClassName: 'highlight',
+          mentionClassName: 'mention',
+          requireMatch: false,
+          keepTrigger: true,
+          suggestions: [{
+            label: 'React',
+            value: 'React'
+          }, {
+            label: 'ReactMentionable',
+            value: 'ReactMentionable'
+          },  {
+            label: 'ToTheMoon',
+            value: 'ReactMentionable'
+          }]
         }]}
-        renderSuggestion={(suggestion, selectSuggestion) => (
-          <div
-            onClick={() => selectSuggestion(suggestion)}
-            key={suggestion.label}
-            className='react-mentionable-suggestion'
-            style={{ borderBottom: '1px solid #ccc', padding: '1rem', cursor: 'pointer' }}
-          >
-            { suggestion.label }
-          </div>
-        )}
+        renderSuggestion={renderSuggestion}
       />
       <button onClick={() => {
         if (editorRef.current) {
