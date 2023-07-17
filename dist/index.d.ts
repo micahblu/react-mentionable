@@ -28,7 +28,7 @@ declare module 'react-mentionable/react-mentionable' {
           markup: string;
       }) => void;
       mentions: Array<Mention>;
-      renderSuggestion?: (suggestion: Suggestion, selectSuggestion: (suggestion: Suggestion) => void) => React.ReactElement;
+      renderSuggestion?: (trigger: string, suggestion: Suggestion, selectSuggestion: (suggestion: Suggestion) => void) => React.ReactElement;
       disabled?: boolean;
   };
   export const MENTION_HIGHLIGHT_CLASSNAME = "react-mentionable-highlight";

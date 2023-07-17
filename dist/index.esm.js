@@ -29,7 +29,7 @@ var insertMention = ({
     mentionValue = mentionValue.substr(1);
   }
   mentionEl.className = mentionClassName, mentionEl.setAttribute("trigger", trigger);
-  mentionEl.setAttribute("value", mentionValue);
+  mentionEl.setAttribute("value", mentionValue.trim());
   mentionEl.contentEditable = "false";
   mentionEl.innerText = mentionLabel.trim();
   insertAfter(mentionEl, highlightEl);
