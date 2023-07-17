@@ -14,13 +14,24 @@ var insertMention = ({
   highlightEl,
   value,
   label,
-  trigger
+  trigger,
+  keepTrigger = false
 }) => {
   const mentionEl = document.createElement("span");
+  let mentionLabel = label;
+  let mentionValue = value;
+  if (!keepTrigger && label.indexOf(trigger) === 0) {
+    mentionLabel = mentionLabel.substr(1);
+  } else if (keepTrigger && label.indexOf(trigger) === -1) {
+    mentionLabel = `${trigger}${mentionLabel}`;
+  }
+  if (mentionValue.indexOf(trigger) === 0) {
+    mentionValue = mentionValue.substr(1);
+  }
   mentionEl.className = mentionClassName, mentionEl.setAttribute("trigger", trigger);
-  mentionEl.setAttribute("value", value);
+  mentionEl.setAttribute("value", mentionValue);
   mentionEl.contentEditable = "false";
-  mentionEl.innerText = label;
+  mentionEl.innerText = mentionLabel.trim();
   insertAfter(mentionEl, highlightEl);
   const anchorTextNode = document.createTextNode("\xA0");
   insertAfter(anchorTextNode, mentionEl);
@@ -62,19 +73,6 @@ var removeFontTags = (el) => {
     nodes[i].parentNode?.removeChild(nodes[i]);
   }
   autoPositionCaret(el);
-};
-var getLastNode = (parentNode, refNode) => {
-  if (!refNode) {
-    return parentNode.childNodes[parentNode.childNodes.length - 1];
-  }
-  const len = parentNode.childNodes.length - 1;
-  let lastNode;
-  for (let i = 0; i <= len; i++) {
-    lastNode = parentNode.childNodes[i];
-    if (lastNode === refNode)
-      break;
-  }
-  return lastNode;
 };
 var getCaretPosition = (element) => {
   let caretOffset = 0;
@@ -205,23 +203,23 @@ var ReactMentionable = forwardRef(
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [suggestions, setSuggestions] = useState([]);
     const triggers = mentions.map((mention) => mention.trigger);
-    let isMatching = useRef(false);
     let currentTrigger = useRef();
     let matches = useRef([]);
     const selectSuggestion = (suggestion) => {
       const highlightEl = document.getElementsByClassName(MENTION_HIGHLIGHT_CLASSNAME)[0];
       if (!editorRef.current || !highlightEl)
         return;
+      const mention = mentions.find((m) => m.trigger === currentTrigger.current);
       insertMention({
-        mentionClassName: mentions.find((m) => m.trigger === currentTrigger.current)?.mentionClassName || "",
+        mentionClassName: mention?.mentionClassName || "",
         trigger: currentTrigger.current || "",
+        keepTrigger: mention?.keepTrigger || false,
         value: suggestion.value,
         editorEl: editorRef.current,
         label: suggestion.label,
         highlightEl
       });
       setShowSuggestions(false);
-      isMatching.current = false;
     };
     const onPasteListener = (e) => {
       e.preventDefault();
@@ -243,27 +241,37 @@ var ReactMentionable = forwardRef(
       const highlightEl = document.getElementsByClassName(MENTION_HIGHLIGHT_CLASSNAME)[0];
       removeFontTags(editorRef.current);
       const key = e.key || getLastKeyStroke(editorRef.current);
-      if (isMatching.current && key === "Tab" || key === " ") {
-        const lastNode = getLastNode(editorRef.current);
-        if (!lastNode)
-          return;
-        const nodeText = lastNode?.nodeValue?.replace(currentTrigger.current || "", "").toLowerCase() || "";
-        if (highlightEl && (matches.current.length === 1 && isMatching.current) || matches.current.map((m) => m.label).includes(nodeText)) {
+      if (highlightEl && key === "Tab" || key === " ") {
+        const requireMatch = mentions.find((m) => m.trigger === currentTrigger.current)?.requireMatch;
+        if (matches.current.length && key === "Tab") {
+          const mention = mentions.find((m) => m.trigger === currentTrigger.current);
           insertMention({
-            mentionClassName: mentions.find((m) => m.trigger === currentTrigger.current)?.mentionClassName || "",
+            mentionClassName: mention?.mentionClassName || "",
             trigger: currentTrigger.current || "",
+            keepTrigger: mention?.keepTrigger || false,
             value: matches.current[0].value,
             editorEl: editorRef.current,
             label: matches.current[0].label,
             highlightEl
           });
-        } else if (isMatching.current && matches.current.length !== 1 && highlightEl) {
+        } else if (!requireMatch) {
+          const mention = mentions.find((m) => m.trigger === currentTrigger.current);
+          insertMention({
+            mentionClassName: mention?.mentionClassName || "",
+            trigger: currentTrigger.current || "",
+            keepTrigger: mention?.keepTrigger || false,
+            value: highlightEl.innerText,
+            editorEl: editorRef.current,
+            label: highlightEl.innerText,
+            highlightEl
+          });
+        } else if (matches.current.length !== 1 && highlightEl) {
           removeHighlight(editorRef.current, highlightEl);
           autoPositionCaret(editorRef.current);
         }
-        isMatching.current = false;
+        matches.current = [];
         setShowSuggestions(false);
-      } else if (isMatching.current && key !== currentTrigger.current) {
+      } else if (highlightEl && key !== currentTrigger.current) {
         const inputStr = highlightEl?.innerText || "";
         const symbolIndex = inputStr.lastIndexOf(currentTrigger.current || "");
         const searchStr = inputStr.substr(symbolIndex + 1).replace(/[^\w]/, "");
@@ -296,7 +304,6 @@ var ReactMentionable = forwardRef(
         removeTrailingBreaks(editorRef.current);
         if (!highlightEl) {
           setShowSuggestions(false);
-          isMatching.current = false;
         }
       }
       onChange({
@@ -306,6 +313,7 @@ var ReactMentionable = forwardRef(
     };
     const keyDownListener = (e) => {
       const key = e.key || getLastKeyStroke(editorRef.current);
+      const highlightEl = document.getElementsByClassName(MENTION_HIGHLIGHT_CLASSNAME)[0];
       if (!key || !editorRef.current || typeof document === "undefined")
         return;
       if (key === "Enter") {
@@ -318,12 +326,11 @@ var ReactMentionable = forwardRef(
       } else if (key === "Tab")
         e.preventDefault();
       else if (triggers.includes(key)) {
-        if (isMatching.current) {
+        if (highlightEl) {
           e.preventDefault();
           return;
         }
         currentTrigger.current = key;
-        isMatching.current = true;
         const highlightSpan = document.createElement("span");
         highlightSpan.className = `${MENTION_HIGHLIGHT_CLASSNAME} ${mentions.find((m) => m.trigger === currentTrigger.current)?.highlightClassName}`;
         highlightSpan.innerText = currentTrigger.current;

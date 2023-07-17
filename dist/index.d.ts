@@ -12,7 +12,9 @@ declare module 'react-mentionable/react-mentionable' {
   };
   export type Mention = {
       trigger: string;
+      requireMatch?: boolean;
       highlightClassName?: string;
+      keepTrigger?: boolean;
       mentionClassName?: string;
       suggestions: Array<Suggestion> | ((searchStr: string) => Promise<Array<Suggestion>>);
   };
@@ -48,13 +50,14 @@ declare module 'react-mentionable/stories/ReactMentionable.stories' {
 declare module 'react-mentionable/utils' {
   import type { Mention } from "react-mentionable/react-mentionable";
   export const getLastKeyStroke: (el: HTMLDivElement | null) => string | undefined;
-  export const insertMention: ({ mentionClassName, editorEl, highlightEl, value, label, trigger }: {
+  export const insertMention: ({ mentionClassName, editorEl, highlightEl, value, label, trigger, keepTrigger }: {
       mentionClassName: string;
       editorEl: HTMLDivElement;
       highlightEl: HTMLSpanElement;
       value: string;
       label: string;
       trigger: string;
+      keepTrigger?: boolean | undefined;
   }) => void;
   export const removeHighlight: (editorEl: HTMLDivElement, highlightEl: HTMLElement) => void;
   export const removeTrailingBreaks: (el: HTMLElement | Node) => void;
