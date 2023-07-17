@@ -413,7 +413,7 @@ var ReactMentionable = forwardRef(
         },
         suggestions && suggestions.map((suggestion) => {
           if (renderSuggestion)
-            return renderSuggestion(suggestion, selectSuggestion);
+            return renderSuggestion(currentTrigger.current || "", suggestion, selectSuggestion);
           return /* @__PURE__ */ React.createElement(
             "div",
             {
