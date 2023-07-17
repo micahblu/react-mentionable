@@ -47,7 +47,7 @@ const Demo = () => {
     })
   }
 
-  const renderSuggestion = (suggestion: Suggestion, selectSuggestion: Function) => (
+  const renderSuggestion = (trigger: string, suggestion: Suggestion, selectSuggestion: Function) => (
     <div
       onClick={() => selectSuggestion(suggestion)}
       key={suggestion.label}
@@ -66,7 +66,7 @@ const Demo = () => {
         defaultValue={''}
         suggestionsClassName='suggestions'
         onChange={({ text, markup }) => {
-          // console.log('onChange', markup)
+          console.log('onChange', markup)
         }}
         mentions={[{
           trigger: '@',
