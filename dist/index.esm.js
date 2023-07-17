@@ -265,11 +265,12 @@ var ReactMentionable = forwardRef(
             label: highlightEl.innerText,
             highlightEl
           });
-        } else if (matches.current.length !== 1 && highlightEl) {
+        } else if (requireMatch) {
           removeHighlight(editorRef.current, highlightEl);
           autoPositionCaret(editorRef.current);
         }
         matches.current = [];
+        setSuggestions([]);
         setShowSuggestions(false);
       } else if (highlightEl && key !== currentTrigger.current) {
         const inputStr = highlightEl?.innerText || "";
@@ -303,6 +304,7 @@ var ReactMentionable = forwardRef(
         removeTrailingBreaks(anchorNode);
         removeTrailingBreaks(editorRef.current);
         if (!highlightEl) {
+          setSuggestions([]);
           setShowSuggestions(false);
         }
       }
