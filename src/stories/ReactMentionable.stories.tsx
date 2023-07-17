@@ -35,7 +35,6 @@ const Demo = () => {
       handle: '@tombrady',
       avatar: '/images/tom-brady.jpg'
     }]
-  // console.log('toLinks', toLinks)
   const editorRef = useRef() as React.MutableRefObject<HTMLDivElement>
   const apiCall = debounce((resolve: Function) => {
     window.setTimeout(() => {

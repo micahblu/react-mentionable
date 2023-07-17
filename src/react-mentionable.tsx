@@ -119,12 +119,13 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>(
           highlightEl: highlightEl
         }) 
       }
-      else if (matches.current.length !== 1 && highlightEl) {
+      else if (requireMatch) {
         utils.removeHighlight(editorRef.current, highlightEl)
         utils.autoPositionCaret(editorRef.current)
       }
       // reset match vars and suggestions
       matches.current = []
+      setSuggestions([])
       setShowSuggestions(false)
     }
     
@@ -170,6 +171,7 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>(
      
       // If the highlighted element was removed, hide suggestions, stop matching
       if (!highlightEl) {
+        setSuggestions([])
         setShowSuggestions(false)
       }
     }
