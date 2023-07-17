@@ -23,7 +23,7 @@ type ReactMenttionableProps = {
   defaultValue?: string
   onChange:  (props: { text: string, markup: string }) => void
   mentions: Array<Mention>
-  renderSuggestion?: (suggestion: Suggestion, selectSuggestion: (suggestion: Suggestion) => void) => React.ReactElement, 
+  renderSuggestion?: (trigger: string, suggestion: Suggestion, selectSuggestion: (suggestion: Suggestion) => void) => React.ReactElement, 
   disabled?: boolean
 }
 
@@ -285,7 +285,7 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>(
           }}
         >
           {suggestions && suggestions.map((suggestion) => {
-            if (renderSuggestion) return renderSuggestion(suggestion, selectSuggestion)
+            if (renderSuggestion) return renderSuggestion(currentTrigger.current || '', suggestion, selectSuggestion)
             return (
               <div
                 onClick={() => selectSuggestion(suggestion)}
