@@ -239,18 +239,24 @@ export const debounce = (callback: Function, interval: number): Function => {
 export const convertToMarkup = (html: string): string => {
   const mentionRegex = /(<[^>]+>)([^<]+)<\/[^>]+>/g
 
-  const convertedMarkup = html.replace(/&nbsp;/g, ' ').replace(mentionRegex, (match, p1, p2) => {
+  let convertedMarkup = html.replace(/&nbsp;/g, ' ').replace(mentionRegex, (match, p1, p2) => {
     const triggerRegex = /trigger="(.)"/
     const valueRegex = /value="([^"]+)"/
+    const isHighlightRegex = /highlight/
+    const requireMatchRegex = /require-match="([^"]+)"/
+
     const triggerMatch = p1.match(triggerRegex)
     const valueMatch = p1.match(valueRegex)
+    const requireMatch = p1.match(requireMatchRegex)
+    const isHighlightMatch = p1.match(isHighlightRegex)
 
-    if (!triggerMatch || !valueMatch) {
+    // Only convert to markup highlighted text when requireMatch is false, otherwise return plain text. 
+    if (isHighlightMatch && requireMatch[1] === "true") {
       return p2 
     }
 
     const trigger = triggerMatch[1]
-    const value = valueMatch[1]
+    const value = valueMatch?.length ? valueMatch[1] : p2
 
     return `__${trigger}[${p2}](${value})__ `
   })

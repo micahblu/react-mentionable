@@ -175,7 +175,7 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>(
         setShowSuggestions(false)
       }
     }
-
+    
     onChange({
       text: editorRef.current.innerText,
       markup: utils.convertToMarkup(editorRef.current.innerHTML)
@@ -205,7 +205,10 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>(
 
       currentTrigger.current = key
       const highlightSpan = document.createElement('span')
-      highlightSpan.className = `${MENTION_HIGHLIGHT_CLASSNAME} ${mentions.find(m => m.trigger === currentTrigger.current)?.highlightClassName}`
+      const mention = mentions.find(m => m.trigger === currentTrigger.current)
+      highlightSpan.className = `${MENTION_HIGHLIGHT_CLASSNAME} ${mention?.highlightClassName}`
+      highlightSpan.setAttribute('require-match', mention?.requireMatch ? 'true' : 'false')
+      highlightSpan.setAttribute('trigger', currentTrigger.current)
       highlightSpan.innerText = currentTrigger.current 
       highlightSpan.setAttribute('contentEditable', 'true')
 

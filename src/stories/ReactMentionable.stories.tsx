@@ -66,7 +66,7 @@ const Demo = () => {
         defaultValue={''}
         suggestionsClassName='suggestions'
         onChange={({ text, markup }) => {
-          console.log('onChange', markup)
+          // console.log('onChange', markup)
         }}
         mentions={[{
           trigger: '@',
