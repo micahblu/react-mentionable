@@ -170,16 +170,20 @@ var debounce = (callback, interval) => {
 };
 var convertToMarkup = (html) => {
   const mentionRegex = /(<[^>]+>)([^<]+)<\/[^>]+>/g;
-  const convertedMarkup = html.replace(/&nbsp;/g, " ").replace(mentionRegex, (match, p1, p2) => {
+  let convertedMarkup = html.replace(/&nbsp;/g, " ").replace(mentionRegex, (match, p1, p2) => {
     const triggerRegex = /trigger="(.)"/;
     const valueRegex = /value="([^"]+)"/;
+    const isHighlightRegex = /highlight/;
+    const requireMatchRegex = /require-match="([^"]+)"/;
     const triggerMatch = p1.match(triggerRegex);
     const valueMatch = p1.match(valueRegex);
-    if (!triggerMatch || !valueMatch) {
+    const requireMatch = p1.match(requireMatchRegex);
+    const isHighlightMatch = p1.match(isHighlightRegex);
+    if (isHighlightMatch && requireMatch[1] === "true") {
       return p2;
     }
     const trigger = triggerMatch[1];
-    const value = valueMatch[1];
+    const value = valueMatch?.length ? valueMatch[1] : p2;
     return `__${trigger}[${p2}](${value})__ `;
   });
   return convertedMarkup.replace(/<[^>]+>/g, " ");
@@ -334,7 +338,10 @@ var ReactMentionable = forwardRef(
         }
         currentTrigger.current = key;
         const highlightSpan = document.createElement("span");
-        highlightSpan.className = `${MENTION_HIGHLIGHT_CLASSNAME} ${mentions.find((m) => m.trigger === currentTrigger.current)?.highlightClassName}`;
+        const mention = mentions.find((m) => m.trigger === currentTrigger.current);
+        highlightSpan.className = `${MENTION_HIGHLIGHT_CLASSNAME} ${mention?.highlightClassName}`;
+        highlightSpan.setAttribute("require-match", mention?.requireMatch ? "true" : "false");
+        highlightSpan.setAttribute("trigger", currentTrigger.current);
         highlightSpan.innerText = currentTrigger.current;
         highlightSpan.setAttribute("contentEditable", "true");
         insertAtCaretPos(editorRef.current, highlightSpan);
