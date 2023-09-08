@@ -305,5 +305,4 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>(
   )
 }) 
 
-export { convertFormattedMentions, debounce, insertAtCaretPos } from './utils'
 export default ReactMentionable

@@ -152,6 +152,22 @@ var convertToMentions = (str, mentions) => {
     return `<span class="${classname}" trigger="${trigger}" value="${value}" contenteditable="false">${label}</span>`;
   });
 };
+var convertFormattedMentions = (str, cb) => {
+  const mentionMarkupRegex = /__(.)\[([^\]]+)\]\(([^\)]+)\)__/g;
+  return str.replace(mentionMarkupRegex, (match, p1, p2, p3) => {
+    const trigger = p1;
+    const label = p2;
+    const value = p3;
+    return cb(trigger, label, value);
+  });
+};
+var debounce = (callback, interval) => {
+  let debounceTimeoutId;
+  return function(...args) {
+    clearTimeout(debounceTimeoutId);
+    debounceTimeoutId = window.setTimeout(() => callback.apply(null, args), interval);
+  };
+};
 var convertToMarkup = (html) => {
   const mentionRegex = /(<[^>]+>)([^<]+)<\/[^>]+>/g;
   let convertedMarkup = html.replace(mentionRegex, (match, p1, p2) => {
@@ -431,5 +447,8 @@ var ReactMentionable = forwardRef(
 );
 var react_mentionable_default = ReactMentionable;
 export {
-  react_mentionable_default as default
+  convertFormattedMentions,
+  debounce,
+  react_mentionable_default as default,
+  insertAtCaretPos
 };

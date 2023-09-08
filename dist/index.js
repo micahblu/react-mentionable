@@ -30,7 +30,10 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/index.ts
 var src_exports = {};
 __export(src_exports, {
-  default: () => react_mentionable_default
+  convertFormattedMentions: () => convertFormattedMentions,
+  debounce: () => debounce,
+  default: () => react_mentionable_default,
+  insertAtCaretPos: () => insertAtCaretPos
 });
 module.exports = __toCommonJS(src_exports);
 
@@ -187,6 +190,22 @@ var convertToMentions = (str, mentions) => {
     const classname = mentions.find((m) => m.trigger === trigger)?.mentionClassName;
     return `<span class="${classname}" trigger="${trigger}" value="${value}" contenteditable="false">${label}</span>`;
   });
+};
+var convertFormattedMentions = (str, cb) => {
+  const mentionMarkupRegex = /__(.)\[([^\]]+)\]\(([^\)]+)\)__/g;
+  return str.replace(mentionMarkupRegex, (match, p1, p2, p3) => {
+    const trigger = p1;
+    const label = p2;
+    const value = p3;
+    return cb(trigger, label, value);
+  });
+};
+var debounce = (callback, interval) => {
+  let debounceTimeoutId;
+  return function(...args) {
+    clearTimeout(debounceTimeoutId);
+    debounceTimeoutId = window.setTimeout(() => callback.apply(null, args), interval);
+  };
 };
 var convertToMarkup = (html) => {
   const mentionRegex = /(<[^>]+>)([^<]+)<\/[^>]+>/g;
@@ -466,3 +485,9 @@ var ReactMentionable = (0, import_react.forwardRef)(
   }
 );
 var react_mentionable_default = ReactMentionable;
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  convertFormattedMentions,
+  debounce,
+  insertAtCaretPos
+});

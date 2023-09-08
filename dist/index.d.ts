@@ -76,5 +76,9 @@ declare module 'react-mentionable/utils' {
 }
 declare module 'react-mentionable' {
   import main = require('react-mentionable/src/index');
+  export const insertAtCaretPos: (parentEl: HTMLElement, insertEl: HTMLElement | ChildNode) => void;
+  export const debounce: (callback: Function, interval: number) => Function;
+  export const convertToMarkup: (html: string) => string;
+  export const convertFormattedMentions: (str: string, cb: (trigger: string, label: string, value: string) => string) => string;
   export = main;
 }
