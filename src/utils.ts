@@ -239,7 +239,7 @@ export const debounce = (callback: Function, interval: number): Function => {
 export const convertToMarkup = (html: string): string => {
   const mentionRegex = /(<[^>]+>)([^<]+)<\/[^>]+>/g
 
-  let convertedMarkup = html.replace(/&nbsp;/g, ' ').replace(mentionRegex, (match, p1, p2) => {
+  let convertedMarkup = html.replace(mentionRegex, (match, p1, p2) => {
     const triggerRegex = /trigger="(.)"/
     const valueRegex = /value="([^"]+)"/
     const isHighlightRegex = /highlight/
@@ -259,6 +259,20 @@ export const convertToMarkup = (html: string): string => {
     const value = valueMatch?.length ? valueMatch[1] : p2
 
     return `__${trigger}[${p2}](${value})__ `
+  })
+
+  // convert images to markdown
+  const imgRegex = /<img[^>]+>/
+  convertedMarkup = html.replace(imgRegex, (match) => {
+    const srcMatch = match.match(/src="([^"]+)"/)
+    const altMatch = match.match(/alt="([^"]+)"/)
+    
+    if (!srcMatch) return ''
+
+    const src = srcMatch[1]
+    const alt = altMatch ? altMatch[1] : '' 
+
+    return `![${alt}](${src})`
   })
 
   // unsafe strip of html tags

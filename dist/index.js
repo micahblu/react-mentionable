@@ -30,8 +30,6 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/index.ts
 var src_exports = {};
 __export(src_exports, {
-  convertFormattedMentions: () => convertFormattedMentions,
-  debounce: () => debounce,
   default: () => react_mentionable_default
 });
 module.exports = __toCommonJS(src_exports);
@@ -190,25 +188,9 @@ var convertToMentions = (str, mentions) => {
     return `<span class="${classname}" trigger="${trigger}" value="${value}" contenteditable="false">${label}</span>`;
   });
 };
-var convertFormattedMentions = (str, cb) => {
-  const mentionMarkupRegex = /__(.)\[([^\]]+)\]\(([^\)]+)\)__/g;
-  return str.replace(mentionMarkupRegex, (match, p1, p2, p3) => {
-    const trigger = p1;
-    const label = p2;
-    const value = p3;
-    return cb(trigger, label, value);
-  });
-};
-var debounce = (callback, interval) => {
-  let debounceTimeoutId;
-  return function(...args) {
-    clearTimeout(debounceTimeoutId);
-    debounceTimeoutId = window.setTimeout(() => callback.apply(null, args), interval);
-  };
-};
 var convertToMarkup = (html) => {
   const mentionRegex = /(<[^>]+>)([^<]+)<\/[^>]+>/g;
-  let convertedMarkup = html.replace(/&nbsp;/g, " ").replace(mentionRegex, (match, p1, p2) => {
+  let convertedMarkup = html.replace(mentionRegex, (match, p1, p2) => {
     const triggerRegex = /trigger="(.)"/;
     const valueRegex = /value="([^"]+)"/;
     const isHighlightRegex = /highlight/;
@@ -223,6 +205,16 @@ var convertToMarkup = (html) => {
     const trigger = triggerMatch[1];
     const value = valueMatch?.length ? valueMatch[1] : p2;
     return `__${trigger}[${p2}](${value})__ `;
+  });
+  const imgRegex = /<img[^>]+>/;
+  convertedMarkup = html.replace(imgRegex, (match) => {
+    const srcMatch = match.match(/src="([^"]+)"/);
+    const altMatch = match.match(/alt="([^"]+)"/);
+    if (!srcMatch)
+      return "";
+    const src = srcMatch[1];
+    const alt = altMatch ? altMatch[1] : "";
+    return `![${alt}](${src})`;
   });
   return convertedMarkup.replace(/<[^>]+>/g, " ");
 };
@@ -474,8 +466,3 @@ var ReactMentionable = (0, import_react.forwardRef)(
   }
 );
 var react_mentionable_default = ReactMentionable;
-// Annotate the CommonJS export names for ESM import in node:
-0 && (module.exports = {
-  convertFormattedMentions,
-  debounce
-});

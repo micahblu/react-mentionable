@@ -5,6 +5,7 @@ const { dependencies, peerDependencies } = require('./package.json')
 
 new Generator({
   entry: 'src/index.ts',
+  root: 'src/',
   output: 'dist/index.d.ts'
 }).generate()
 
