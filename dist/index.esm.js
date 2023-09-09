@@ -244,10 +244,6 @@ var ReactMentionable = forwardRef(
       selection.deleteFromDocument();
       selection.getRangeAt(0).insertNode(document.createTextNode(paste));
       selection.collapseToEnd();
-      onChange({
-        text: editorRef.current?.innerText || paste,
-        markup: convertToMarkup(editorRef.current?.innerHTML || paste)
-      });
     };
     const keyUpListener = (e) => {
       if (!editorRef.current)
@@ -322,10 +318,6 @@ var ReactMentionable = forwardRef(
           setShowSuggestions(false);
         }
       }
-      onChange({
-        text: editorRef.current.innerText,
-        markup: convertToMarkup(editorRef.current.innerHTML)
-      });
     };
     const keyDownListener = (e) => {
       const key = e.key || getLastKeyStroke(editorRef.current);
@@ -374,13 +366,21 @@ var ReactMentionable = forwardRef(
     useLayoutEffect(() => {
       if (!editorRef?.current || typeof document === "undefined")
         return;
+      const onChangeHandler = () => {
+        onChange({
+          text: editorRef.current?.innerText || "",
+          markup: convertToMarkup(editorRef.current?.innerHTML || "")
+        });
+      };
       editorRef.current.addEventListener("keydown", keyDownListener);
       editorRef.current.addEventListener("keyup", keyUpListener);
       editorRef.current.addEventListener("paste", onPasteListener);
+      editorRef.current.addEventListener("change", onChangeHandler);
       return () => {
         editorRef.current?.removeEventListener("keydown", keyDownListener);
         editorRef.current?.removeEventListener("keyup", keyUpListener);
         editorRef.current?.removeEventListener("paste", onPasteListener);
+        editorRef.current?.removeEventListener("change", onChangeHandler);
       };
     }, []);
     return /* @__PURE__ */ React.createElement(
