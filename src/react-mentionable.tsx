@@ -78,11 +78,6 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>(
     selection.deleteFromDocument()
     selection.getRangeAt(0).insertNode(document.createTextNode(paste))
     selection.collapseToEnd()
-   
-    onChange({
-      text: editorRef.current?.innerText || paste,
-      markup: utils.convertToMarkup(editorRef.current?.innerHTML || paste)
-    })
   }
 
   const keyUpListener = (e: KeyboardEvent) => {
@@ -175,11 +170,6 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>(
         setShowSuggestions(false)
       }
     }
-    
-    onChange({
-      text: editorRef.current.innerText,
-      markup: utils.convertToMarkup(editorRef.current.innerHTML)
-    })
   }
     
   const keyDownListener = (e: KeyboardEvent) => {
@@ -237,14 +227,22 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>(
 
   useLayoutEffect(() => {
     if (!editorRef?.current || typeof document === 'undefined') return
-
+    const onChangeHandler = () => {
+      onChange({
+        text: editorRef.current?.innerText || '',
+        markup: utils.convertToMarkup(editorRef.current?.innerHTML || '')
+      })
+    }
     editorRef.current.addEventListener('keydown', keyDownListener)
     editorRef.current.addEventListener('keyup', keyUpListener)
     editorRef.current.addEventListener('paste', onPasteListener)
+    editorRef.current.addEventListener('change', onChangeHandler)
+
     return () => {
       editorRef.current?.removeEventListener('keydown', keyDownListener)
       editorRef.current?.removeEventListener('keyup', keyUpListener)
       editorRef.current?.removeEventListener('paste', onPasteListener)
+      editorRef.current?.removeEventListener('change', onChangeHandler)
     }
   }, [])
 
