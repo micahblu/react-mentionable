@@ -233,16 +233,21 @@ const ReactMentionable = forwardRef<HTMLDivElement, ReactMenttionableProps>(
         markup: utils.convertToMarkup(editorRef.current?.innerHTML || '')
       })
     }
+
+    const observer = new MutationObserver(onChangeHandler)
+    observer.observe(editorRef.current, { attributes: true, childList: true, subtree: true })
+
     editorRef.current.addEventListener('keydown', keyDownListener)
     editorRef.current.addEventListener('keyup', keyUpListener)
     editorRef.current.addEventListener('paste', onPasteListener)
-    editorRef.current.addEventListener('change', onChangeHandler)
+    editorRef.current.addEventListener('input', onChangeHandler)
 
     return () => {
       editorRef.current?.removeEventListener('keydown', keyDownListener)
       editorRef.current?.removeEventListener('keyup', keyUpListener)
       editorRef.current?.removeEventListener('paste', onPasteListener)
-      editorRef.current?.removeEventListener('change', onChangeHandler)
+      editorRef.current?.removeEventListener('input', onChangeHandler)
+      observer.disconnect()
     }
   }, [])
 
