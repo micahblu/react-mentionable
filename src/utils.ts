@@ -263,7 +263,7 @@ export const convertToMarkup = (html: string): string => {
 
   // convert images to markdown
   const imgRegex = /<img[^>]+>/
-  convertedMarkup = html.replace(imgRegex, (match) => {
+  convertedMarkup = convertedMarkup.replace(imgRegex, (match) => {
     const srcMatch = match.match(/src="([^"]+)"/)
     const altMatch = match.match(/alt="([^"]+)"/)
     

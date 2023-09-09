@@ -39,8 +39,8 @@ const Demo = () => {
   const apiCall = debounce((searchStr: string, resolve: Function) => {
     window.setTimeout(() => {
       const regex = new RegExp(searchStr, "g")
+      resolve(suggestions.filter(s => regex.test(s.label.toLowerCase()))) 
     }, 200)
-    resolve(suggestions.filter(s => regex.test(s.label.toLowerCase()))) 
   }, 100)
   const fetchSuggestions = async (searchStr: string): Promise<Array<Suggestion>> => {
     return await new Promise((resolve) => {
