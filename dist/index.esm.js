@@ -187,7 +187,7 @@ var convertToMarkup = (html) => {
     return `__${trigger}[${p2}](${value})__ `;
   });
   const imgRegex = /<img[^>]+>/;
-  convertedMarkup = html.replace(imgRegex, (match) => {
+  convertedMarkup = convertedMarkup.replace(imgRegex, (match) => {
     const srcMatch = match.match(/src="([^"]+)"/);
     const altMatch = match.match(/alt="([^"]+)"/);
     if (!srcMatch)
